@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  @apply bg-white text-gray-800 font-sans;
+}
+
+
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold text-gray-900;
+}
+
+a {
+  @apply text-blue-600 hover:text-purple-600 transition-colors;
+}
+
+button {
+  @apply px-4 py-2 rounded-lg font-medium bg-primary text-white hover:bg-secondary transition;
+}

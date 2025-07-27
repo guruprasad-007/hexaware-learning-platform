@@ -1,0 +1,168 @@
+/* Orb Animations */
+.orb-animation {
+  animation: orbit 25s linear infinite;
+}
+
+.orb-reverse-animation {
+  animation: orbit-reverse 30s linear infinite;
+}
+
+.orb-small-animation {
+  animation: orbit-small 8s linear infinite;
+}
+
+.float-diagonal-animation {
+  animation: float-diagonal 20s ease-in-out infinite;
+}
+
+/* Particle Animations */
+.particle-dance-animation {
+  animation: particle-dance 4s ease-in-out infinite;
+}
+
+.particle-float-animation {
+  animation: particle-float 5s ease-in-out infinite;
+}
+
+/* Entrance Animations */
+.form-entrance-animation {
+  animation: form-entrance 1s ease-out;
+}
+
+.fade-in-up-animation {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+/* Icon Animations */
+.icon-breathe-animation {
+  animation: icon-breathe 4s ease-in-out infinite;
+}
+
+.icon-pulse-animation {
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+/* Micro-interaction Animations */
+.bounce-gentle-animation {
+  animation: bounce-gentle 3s ease-in-out infinite;
+}
+
+.pulse-gentle-animation {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+.wiggle-gentle-animation {
+  animation: wiggle-gentle 4s ease-in-out infinite;
+}
+
+/* Keyframes */
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+}
+
+@keyframes orbit-reverse {
+  0% { transform: rotate(0deg) translateX(-120px) rotate(0deg); }
+  100% { transform: rotate(-360deg) translateX(-120px) rotate(360deg); }
+}
+
+@keyframes orbit-small {
+  0% { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+}
+
+@keyframes float-diagonal {
+  0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+  25% { transform: translate(15px, -15px) rotate(90deg); }
+  50% { transform: translate(0px, -30px) rotate(180deg); }
+  75% { transform: translate(-15px, -15px) rotate(270deg); }
+}
+
+@keyframes particle-dance {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-20px) rotate(90deg); }
+  50% { transform: translateY(-10px) rotate(180deg); }
+  75% { transform: translateY(-30px) rotate(270deg); }
+}
+
+@keyframes particle-float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-25px) scale(1.5); }
+}
+
+@keyframes form-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes icon-breathe {
+  0%, 100% { transform: scale(1) rotate(12deg); }
+  50% { transform: scale(1.05) rotate(12deg); }
+}
+
+@keyframes icon-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes wiggle-gentle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+/* Delay classes */
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-700 {
+  animation-delay: 700ms;
+}
+
+.delay-900 {
+  animation-delay: 900ms;
+}
+
+.delay-1100 {
+  animation-delay: 1100ms;
+}
+
+.delay-1500 {
+  animation-delay: 1500ms;
+}
+
+.delay-1700 {
+  animation-delay: 1700ms;
+}
