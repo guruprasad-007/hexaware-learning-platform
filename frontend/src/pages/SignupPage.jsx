@@ -1,7 +1,33 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import "./SignUpPage.css"; // We'll create this CSS file for animations
+import { useState } from "react";
+import axios from "axios";
 
 export default function SignUpPage() {
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSignUp = async (e) => {
+  e.preventDefault();
+  try {
+    const { data } = await axios.post("http://localhost:5000/api/auth/register", {  // Change URL to your backend endpoint
+      fullName,
+      email,
+      password
+    });
+    localStorage.setItem("token", data.token); // Save token
+    navigate("/"); // Redirect to home page after signup
+  } catch (error) {
+    console.error(error);
+    alert(error.response?.data?.message || "Sign Up Failed");
+  }
+};
+
+
+
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 overflow-hidden">
       {/* Background Elements */}
@@ -49,7 +75,7 @@ export default function SignUpPage() {
         </div>
 
         {/* Form */}
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSignUp}>
           {/* Name Field */}
           <div className="relative group fade-in-up-animation delay-700">
             <label className="block text-sm font-semibold text-gray-700/80 mb-2 transform group-focus-within:text-purple-600 transition-colors duration-300">
@@ -63,6 +89,8 @@ export default function SignUpPage() {
             <div className="relative">
               <input
                 type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your full name"
                 className="w-full px-5 py-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-sm focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 outline-none transition-all duration-300 placeholder-gray-500/60 text-gray-800 hover:bg-white/30"
               />
@@ -83,6 +111,8 @@ export default function SignUpPage() {
               <input
                 type="email"
                 placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-5 py-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-sm focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 outline-none transition-all duration-300 placeholder-gray-500/60 text-gray-800 hover:bg-white/30"
               />
             </div>
@@ -101,6 +131,8 @@ export default function SignUpPage() {
             <div className="relative">
               <input
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a strong password"
                 className="w-full px-5 py-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-sm focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 outline-none transition-all duration-300 placeholder-gray-500/60 text-gray-800 hover:bg-white/30"
               />

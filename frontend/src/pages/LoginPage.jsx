@@ -1,11 +1,35 @@
 import { Link, useNavigate } from "react-router-dom";
-
+import { useState } from "react";
+import axios from "axios";
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault(); // Prevent form refresh
-    navigate("/");  // Redirect to homepage
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // Send login request to backend
+      const { data } = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
+
+      // Save JWT token and user role
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+
+      // Redirect based on role
+      if (data.role === "admin") {
+        navigate("/");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error)
+      alert(error.response?.data?.message || "Login Failed");
+    }
   };
 
   return (
@@ -65,6 +89,8 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-5 py-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-sm focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 outline-none transition-all duration-300 placeholder-gray-500/60 text-gray-800"
             />
           </div>
@@ -76,6 +102,8 @@ export default function LoginPage() {
             <input
               type="password"
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-5 py-4 rounded-2xl border border-white/30 bg-white/20 backdrop-blur-sm focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 outline-none transition-all duration-300 placeholder-gray-500/60 text-gray-800"
             />
           </div>
