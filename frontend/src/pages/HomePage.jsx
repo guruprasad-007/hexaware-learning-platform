@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Header from "../components/common/Header";
 import Footer from "../components/common/Footer";
+import ChatbotComponent from "../components/chatbot/ChatbotComponent";
 
 export default function HomePage() {
   return (
@@ -250,6 +251,9 @@ export default function HomePage() {
       </main>
       
       <Footer />
+
+      {/* Integrated Chatbot Component - Positioned to float above content */}
+      <ChatbotComponent />
 
       {/* Custom CSS for animations */}
       <style jsx>{`
