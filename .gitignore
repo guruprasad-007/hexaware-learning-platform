@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# ai-agents/.gitignore
+.env
+__pycache__/
+*.pyc
+
+# backend/.gitignore
+.env
+node_modules/

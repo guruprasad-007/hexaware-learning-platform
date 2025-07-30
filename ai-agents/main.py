@@ -2,18 +2,19 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS # To handle CORS issues between frontend and this server
 from chatbot_agent import ChatbotAgent # Import your new chatbot agent
-
+from dotenv import load_dotenv
 # Import your other agents if main.py is orchestrating them
 # from profile_agent import ProfileAgent
 # from assessment_agent import AssessmentAgent
 # from recommender_agent import RecommenderAgent
 # from tracker_agent import TrackerAgent
-
+load_dotenv()
 app = Flask(__name__)
 CORS(app) # Enable CORS for all origins (adjust in production for security)
 
 # Initialize your chatbot agent
 chatbot = ChatbotAgent()
+
 
 # If you have other agents that need to be initialized for calls from the chatbot, do it here
 # profile_agent_instance = ProfileAgent()
