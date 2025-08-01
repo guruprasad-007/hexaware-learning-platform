@@ -19,7 +19,6 @@ export default function LoginPage() {
       // Save JWT token and user role
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
-
       // Redirect based on role
       if (data.role === "admin") {
         navigate("/admin");
@@ -28,6 +27,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.log(error)
+
       alert(error.response?.data?.message || "Login Failed");
     }
   };
