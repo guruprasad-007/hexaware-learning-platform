@@ -3,8 +3,9 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import CoursePage from "./pages/CoursePage";
+import CourseDetailPage from "./pages/CourseDetail";
 import DashboardPage from "./pages/DashboardPage";
-import AdminDashboardPage from "./pages/AdminPage"; // ✅ Import the new Admin Dashboard
+import AdminDashboardPage from "./pages/AdminPage";
 import PrivateRoute from "./PrivateRoute";
 
 export default function App() {
@@ -16,7 +17,8 @@ export default function App() {
         <Route path="/" element={<PrivateRoute allowedRoles={["user"]}><HomePage /></PrivateRoute>} />
         <Route path="/courses" element={<PrivateRoute allowedRoles={["user"]}><CoursePage /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute allowedRoles={["user"]}><DashboardPage /></PrivateRoute>} />
-        <Route path="/admin" element={<PrivateRoute allowedRoles={["admin"]}><AdminDashboardPage /></PrivateRoute>} /> {/* ✅ Added */}
+        <Route path="/admin" element={<PrivateRoute allowedRoles={["admin"]}><AdminDashboardPage /></PrivateRoute>} />
+        <Route path="/courses/:id" element={<CourseDetailPage />} />
       </Routes>
     </Router>
   );
