@@ -1,5 +1,6 @@
 import { BookOpen, Star, Clock, ArrowRight, Users, Play, TrendingUp, Award, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
+import Header from "../components/common/Header";
 
 export default function CoursePage() {
   const [selectedFilter, setSelectedFilter] = useState("all");
@@ -170,6 +171,8 @@ export default function CoursePage() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden">
+      <Header /> {/* Your Navbar component */}
+
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>

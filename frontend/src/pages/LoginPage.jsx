@@ -22,7 +22,7 @@ export default function LoginPage() {
 
       // Redirect based on role
       if (data.role === "admin") {
-        navigate("/");
+        navigate("/admin");
       } else {
         navigate("/");
       }
