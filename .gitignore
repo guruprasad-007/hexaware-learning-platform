@@ -30,3 +30,7 @@ __pycache__/
 # backend/.gitignore
 .env
 node_modules/
+node_modules
+
+#frontend
+node_modules/

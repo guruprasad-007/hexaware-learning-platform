@@ -1,5 +1,7 @@
+// backend/src/controllers/authController.js (MODIFIED)
+
 import User from "../models/User.js";
-import { generateToken } from "../utils/jwt.js";
+import jwt from "jsonwebtoken";
 
 // Register
 export const registerUser = async (req, res) => {
@@ -7,16 +9,23 @@ export const registerUser = async (req, res) => {
 
   try {
     const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: "User already exists" });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
 
     const user = await User.create({ fullName, email, password, role });
+
+    // Assuming a generateToken utility exists
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.status(201).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id, user.role),
+      token,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -24,24 +33,35 @@ export const registerUser = async (req, res) => {
 };
 
 // Login
-export const loginUser = async (req, res) => {
+// @desc    User/Admin Login
+// @route   POST /api/auth/login
+// @access  Public
+export const login = async (req, res) => {
   const { email, password } = req.body;
+  const user = await User.findOne({ email });
 
-  try {
-    const user = await User.findOne({ email });
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id, user.role),
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
+  if (user && (await user.matchPassword(password))) {
+    // Update loginHistory with the current date
+    const today = new Date();
+    const lastLoginDate = user.loginHistory && user.loginHistory.length > 0 ? user.loginHistory[user.loginHistory.length - 1] : null;
+
+    // Only push a new date if the last login was on a different day
+    if (!lastLoginDate || lastLoginDate.getDate() !== today.getDate() || lastLoginDate.getMonth() !== today.getMonth() || lastLoginDate.getFullYear() !== today.getFullYear()) {
+      user.loginHistory.push(today);
+      await user.save();
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      role: user.role, // Pass the user's role to the frontend
+    });
+  } else {
+    res.status(401).json({ message: "Invalid credentials" });
   }
 };
 

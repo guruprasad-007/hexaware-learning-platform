@@ -99,24 +99,22 @@ export default function HomePage() {
             <div className="lg:w-1/2 relative animate-fade-in-right">
               <div className="relative bg-gradient-to-br from-yellow-200 via-purple-200 to-blue-200 rounded-3xl p-8 shadow-2xl transform hover:rotate-1 transition-transform duration-700 animate-float">
                 
-                {/* Main Image Placeholder with Animation */}
+                {/* Main Hero Image */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6 transform hover:scale-105 transition-transform duration-500">
-                  <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
-                    {/* Animated Background Pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="absolute top-4 left-4 w-8 h-8 bg-purple-400 rounded-full animate-ping"></div>
-                      <div className="absolute bottom-4 right-4 w-6 h-6 bg-indigo-400 rounded-full animate-pulse delay-500"></div>
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-purple-300 rounded-full animate-spin-slow"></div>
-                    </div>
+                  <div className="h-64 relative overflow-hidden">
+                    {/* AI Learning Illustration */}
+                    <img 
+                      src="https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80"
+                      alt="AI Learning Platform Dashboard"
+                      className="w-full h-full object-cover"
+                    />
                     
-                    <div className="text-center space-y-4 relative z-10">
-                      <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full mx-auto flex items-center justify-center animate-bounce-gentle hover:animate-spin transition-all duration-300">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <p className="text-gray-500 font-medium animate-pulse">Insert your hero image here</p>
-                    </div>
+                    {/* Overlay with gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 to-transparent"></div>
+                    
+                    {/* Animated floating elements */}
+                    <div className="absolute top-4 left-4 w-8 h-8 bg-purple-400/80 rounded-full animate-ping"></div>
+                    <div className="absolute bottom-4 right-4 w-6 h-6 bg-indigo-400/80 rounded-full animate-pulse delay-500"></div>
                   </div>
                 </div>
 
@@ -151,13 +149,21 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Enhanced Video Placeholder */}
+                {/* Enhanced Video Preview */}
                 <div className="absolute top-1/2 right-6 transform translate-y-1/2 bg-white/90 backdrop-blur-md rounded-lg shadow-lg p-3 hover:scale-110 transition-all duration-300 animate-wiggle-gentle">
                   <div className="w-20 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-indigo-400/10 animate-pulse"></div>
-                    <svg className="w-6 h-6 text-gray-400 animate-pulse hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
+                    <img 
+                      src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                      alt="Video Preview"
+                      className="w-full h-full object-cover rounded opacity-80"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-8 h-8 bg-white/80 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-purple-600 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -165,7 +171,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Enhanced Trust Section */}
+        {/* Enhanced Trust Section with Real Brand Logos */}
         <div className="bg-white/80 backdrop-blur-sm py-16 relative">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 animate-gradient-x"></div>
           <div className="container mx-auto px-4 relative z-10">
@@ -174,15 +180,68 @@ export default function HomePage() {
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-8 items-center justify-items-center opacity-60">
-              {[...Array(7)].map((_, index) => (
-                <div 
-                  key={index}
-                  className="bg-gray-200/80 backdrop-blur-sm rounded-lg p-4 w-24 h-12 flex items-center justify-center hover:bg-gray-300/80 transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up"
-                  style={{animationDelay: `${index * 100}ms`}}
-                >
-                  <span className="text-xs font-semibold text-gray-500">LOGO</span>
-                </div>
-              ))}
+              {/* Google */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 w-28 h-16 flex items-center justify-center hover:bg-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up" style={{animationDelay: '0ms'}}>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg"
+                  alt="Google"
+                  className="h-8 w-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Microsoft */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 w-28 h-16 flex items-center justify-center hover:bg-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up" style={{animationDelay: '100ms'}}>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg"
+                  alt="Microsoft"
+                  className="h-6 w-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Amazon */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 w-28 h-16 flex items-center justify-center hover:bg-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up" style={{animationDelay: '200ms'}}>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg"
+                  alt="Amazon"
+                  className="h-8 w-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Netflix */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 w-28 h-16 flex items-center justify-center hover:bg-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up" style={{animationDelay: '300ms'}}>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
+                  alt="Netflix"
+                  className="h-8 w-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Spotify */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 w-28 h-16 flex items-center justify-center hover:bg-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up" style={{animationDelay: '400ms'}}>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg"
+                  alt="Spotify"
+                  className="h-10 w-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Airbnb */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 w-28 h-16 flex items-center justify-center hover:bg-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up" style={{animationDelay: '500ms'}}>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg"
+                  alt="Airbnb"
+                  className="h-8 w-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              
+              {/* Uber */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 w-28 h-16 flex items-center justify-center hover:bg-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 animate-fade-in-up" style={{animationDelay: '600ms'}}>
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
+                  alt="Uber"
+                  className="h-6 w-auto filter grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -210,37 +269,49 @@ export default function HomePage() {
                   title: "Smart Learning",
                   description: "AI analyzes your progress and adapts to your learning style for maximum efficiency",
                   gradient: "from-blue-500 to-indigo-600",
-                  delay: "0"
+                  delay: "0",
+                  image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                 },
                 {
                   icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
                   title: "Personalized Path",
                   description: "Get customized learning journeys based on your goals and current skill level",
                   gradient: "from-purple-500 to-pink-600",
-                  delay: "200"
+                  delay: "200",
+                  image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                 },
                 {
                   icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1",
                   title: "Track Progress",
                   description: "Monitor your learning journey with detailed analytics and achievement tracking",
                   gradient: "from-green-500 to-teal-600",
-                  delay: "400"
+                  delay: "400",
+                  image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                 }
               ].map((feature, index) => (
                 <div 
                   key={index}
-                  className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-4 hover:rotate-1 animate-fade-in-up"
+                  className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-4 hover:rotate-1 animate-fade-in-up relative overflow-hidden"
                   style={{animationDelay: `${feature.delay}ms`}}
                 >
-                  <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300 animate-pulse-gentle`}>
+                  {/* Background Image */}
+                  <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
+                    <img 
+                      src={feature.image}
+                      alt={feature.title}
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
+                  </div>
+                  
+                  <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300 animate-pulse-gentle relative z-10`}>
                     <svg className="w-8 h-8 text-white group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-purple-600 transition-colors duration-300">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-purple-600 transition-colors duration-300 relative z-10">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                  <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300 relative z-10">
                     {feature.description}
                   </p>
                 </div>

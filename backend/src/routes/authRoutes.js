@@ -1,11 +1,13 @@
+// backend/src/routes/authRoutes.js (MODIFIED)
+
 import express from "express";
-import { registerUser, loginUser, getUserProfile } from "../controllers/authController.js";
-import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { registerUser, login, getUserProfile } from "../controllers/authController.js"; // <--- CORRECTED IMPORT
+import { protect, adminOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 
 router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/login", login); // <-- Correctly uses the 'login' function
 router.get("/profile", protect, getUserProfile); // Only logged-in users
 
 router.get("/admin", protect, adminOnly, (req, res) => {

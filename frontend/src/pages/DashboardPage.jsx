@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from '../components/common/Header';
+import Footer from '../components/common/Footer';
 import { Star, Award, Flame, BookCheck, Gauge, User, Play, Clock, ArrowRight } from "lucide-react";
+import api from '../services/api';
 
-// Custom Progress Component
+// Custom Progress Component (from your code)
 const Progress = ({ value }) => (
   <div className="w-full bg-gray-200 rounded-full h-2 mt-2 relative overflow-hidden">
     <div 
@@ -13,93 +16,75 @@ const Progress = ({ value }) => (
     </div>
   </div>
 );
-import Header from "../components/common/Header";
 
-const DashboardPage = () => {
+export default function DashboardPage() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     navigate("/login");
   };
 
-  const allCourses = [
-    { 
-      id: 1, 
-      title: "React Mastery", 
-      progress: 80, 
-      type: "ongoing",
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop&auto=format",
-      category: "Frontend",
-      level: "Intermediate",
-      duration: "12 hrs"
-    },
-    { 
-      id: 2, 
-      title: "AWS Essentials", 
-      progress: 45, 
-      type: "ongoing",
-      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=250&fit=crop&auto=format",
-      category: "Cloud & DevOps",
-      level: "Beginner",
-      duration: "20 hrs"
-    },
-    { 
-      id: 3, 
-      title: "MongoDB Basics", 
-      progress: 100, 
-      type: "completed",
-      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=250&fit=crop&auto=format",
-      category: "Backend",
-      level: "Beginner",
-      duration: "8 hrs"
-    },
-    { 
-      id: 4, 
-      title: "JavaScript Deep Dive", 
-      progress: 100, 
-      type: "completed",
-      image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400&h=250&fit=crop&auto=format",
-      category: "Web Development",
-      level: "Advanced",
-      duration: "15 hrs"
-    },
-    { 
-      id: 5, 
-      title: "DevOps Fundamentals", 
-      progress: 0, 
-      type: "popular",
-      image: "https://images.unsplash.com/photo-1605745341112-85968b19335b?w=400&h=250&fit=crop&auto=format",
-      category: "DevOps",
-      level: "Intermediate",
-      duration: "16 hrs"
-    },
-    { 
-      id: 6, 
-      title: "Python for Data Science", 
-      progress: 20, 
-      type: "popular",
-      image: "https://images.unsplash.com/photo-1526379879981-0f0a5a34bdb6?w=400&h=250&fit=crop&auto=format",
-      category: "Data Science",
-      level: "Intermediate",
-      duration: "22 hrs"
-    },
-  ];
-
-  const completedCoursesCount = allCourses.filter(course => course.progress === 100).length;
+  const completedCoursesCount = enrolledCourses.filter(course => course.progress === 100).length;
+  // This is hardcoded for now, you would fetch this from your backend in a later phase
   const currentUserPoints = 75;
+
+  // This effect fetches user data and enrolled courses from the backend
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error("No token found");
+        }
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+
+        // Fetch user profile
+        const userResponse = await api.get('/auth/profile', config);
+        setUser(userResponse.data);
+
+        // Fetch enrolled courses
+        const coursesResponse = await api.get('/courses/enrolled', config);
+        // Add mock progress data for now, until you implement progress tracking
+        const formattedCourses = coursesResponse.data.map(course => ({
+          ...course,
+          progress: Math.floor(Math.random() * 101),
+          type: "ongoing", // Placeholder type
+          category: "Web Development", // Placeholder category
+          level: "Intermediate", // Placeholder level
+          duration: "12 hrs", // Placeholder duration
+          image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop&auto=format", // Placeholder image
+        }));
+        setEnrolledCourses(formattedCourses);
+      } catch (err) {
+        console.error("Dashboard data fetch error:", err);
+        setError("Failed to fetch user profile or courses. Please log in.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
   const filteredCourses =
     filter === "all"
-      ? allCourses
-      : allCourses.filter((course) => course.type === filter);
+      ? enrolledCourses
+      : enrolledCourses.filter((course) => course.type === filter);
+
+  if (loading) return <div>Loading dashboard...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <>
       <Header />
-
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 p-6 relative overflow-hidden">
+        
         {/* Background Animation Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-indigo-400/10 rounded-full blur-3xl animate-float-slow"></div>
@@ -129,8 +114,9 @@ const DashboardPage = () => {
               </div>
 
               <div className="text-center sm:text-left flex-grow">
+                {/* Greeting with dynamic name */}
                 <h2 className="text-2xl font-bold text-purple-800 animate-gradient-text">
-                  John Kevin
+                  Hello, {user ? user.fullName : 'User'}!
                 </h2>
 
                 {/* Stats Grid with Enhanced Animations */}
@@ -143,7 +129,7 @@ const DashboardPage = () => {
                       <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-lg group-hover:animate-pulse"></div>
                     </div>
                     <p className="font-semibold text-gray-700 text-lg group-hover:text-blue-700 transition-colors duration-300">
-                      {currentUserPoints}/100
+                      75/100
                     </p>
                     <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-300">
                       Current Points
@@ -199,6 +185,7 @@ const DashboardPage = () => {
               Your Learning Journey
             </h3>
             
+            {/* NEW FILTER TABS */}
             <div className="flex space-x-4 mb-6">
               {["all", "ongoing", "completed", "popular"].map((tab, index) => (
                 <button
@@ -285,7 +272,7 @@ const DashboardPage = () => {
                         course.level === 'Beginner' ? 'bg-green-100 text-green-700' :
                         course.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-red-100 text-red-700'
-                      }`}>
+                      }`.trim()}>
                         {course.level}
                       </span>
                     </div>
@@ -331,7 +318,7 @@ const DashboardPage = () => {
               ].map((achievement, index) => (
                 <div 
                   key={index}
-                  className="group bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm p-4 rounded-xl shadow-md hover:shadow-lg w-40 text-center transform hover:-translate-y-2 hover:scale-105 transition-all duration-300 animate-fade-in-up"
+                  className={`group bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm p-4 rounded-xl shadow-md hover:shadow-lg w-40 text-center transform hover:-translate-y-2 hover:scale-105 transition-all duration-300 animate-fade-in-up`}
                   style={{ animationDelay: `${achievement.delay}ms` }}
                 >
                   <div className="text-2xl mb-2 group-hover:animate-bounce transition-all duration-300">
@@ -513,10 +500,17 @@ const DashboardPage = () => {
           .delay-700 { animation-delay: 700ms; }
           .delay-800 { animation-delay: 800ms; }
           .delay-1000 { animation-delay: 1000ms; }
+          
+          .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
         `}</style>
       </div>
+      <Footer />
     </>
   );
-};
+}
 
-export default DashboardPage;

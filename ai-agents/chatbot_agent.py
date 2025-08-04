@@ -24,7 +24,7 @@ class ChatbotAgent:
 
         # Hardcoded responses (These will be checked first)
         if "hello" in user_message_lower or "hi" in user_message_lower:
-            return "Hello! How can I assist you with Hexaware's learning platform today?"
+            return "Hello!I am Vai. How can I assist you with E-GURU's learning platform today?"
         elif "courses" in user_message_lower or "learn" in user_message_lower:
             return "Our platform offers a wide range of courses. You can explore them in the 'Courses' section. What specific topic are you interested in?"
         elif "progress" in user_message_lower or "track" in user_message_lower:
