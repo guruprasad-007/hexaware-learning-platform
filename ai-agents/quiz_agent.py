@@ -1,7 +1,7 @@
 # ai-agents/quiz_agent.py
 import google.generativeai as genai
 import os
-import json # <-- This import is crucial
+import json
 
 class QuizAgent:
     def __init__(self):

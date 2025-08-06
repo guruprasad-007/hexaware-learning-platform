@@ -1,103 +1,18 @@
 import { BookOpen, Star, Clock, ArrowRight, Users, Play, TrendingUp, Award, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import Link and useNavigate
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import api from '../services/api';
+import { Link, useNavigate } from "react-router-dom";
 
 export default function CoursePage() {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
-  const [courses, setCourses] = useState([]); // All available courses
+  const [courses, setCourses] = useState([]); // All available courses from backend
   const [enrolledCourseIds, setEnrolledCourseIds] = useState(new Set()); // IDs of courses the user is enrolled in
   const [error, setError] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const navigate = useNavigate(); // Initialize useNavigate
-
-  // Hardcoded sample courses
-  const hardcodedCourses = [
-    {
-      _id: 'hardcoded-1',
-      title: 'Introduction to the Course',
-      description: 'Get started with the fundamentals of web development and learn the essential skills needed to build modern web applications.',
-      category: 'web',
-      level: 'Beginner',
-      instructor: 'John Smith',
-      rating: '4.8',
-      duration: '3min',
-      lessons: '2',
-      students: '1.2k',
-      imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-      modules: [
-        {
-          title: 'Introduction to the Course',
-          content: 'Welcome to the comprehensive web development course where you will learn HTML, CSS, JavaScript and modern frameworks.',
-          lectures: 2,
-          duration: '3min'
-        },
-        {
-          title: 'Setting up Development Environment',
-          content: 'Learn how to set up your development environment with VS Code, Node.js, and essential extensions.',
-          lectures: 3,
-          duration: '15min'
-        }
-      ]
-    },
-    {
-      _id: 'hardcoded-2',
-      title: 'Leveraging Generative AI for Data Analytics [NEW]',
-      description: 'Master the power of generative AI tools like ChatGPT and Claude for advanced data analysis and insights generation.',
-      category: 'ai',
-      level: 'Intermediate',
-      instructor: 'Dr. Sarah Johnson',
-      rating: '4.9',
-      duration: '1hr 29min',
-      lessons: '7',
-      students: '850',
-      imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-      modules: [
-        {
-          title: 'Understanding Generative AI Basics',
-          content: 'Explore the fundamentals of generative AI and its applications in data analytics.',
-          lectures: 3,
-          duration: '25min'
-        },
-        {
-          title: 'Prompt Engineering for Data Analysis',
-          content: 'Learn effective prompt engineering techniques for data analysis tasks.',
-          lectures: 4,
-          duration: '1hr 4min'
-        }
-      ]
-    },
-    {
-      _id: 'hardcoded-3',
-      title: 'Introduction to Data Analytics',
-      description: 'Comprehensive introduction to data analytics covering statistics, visualization, and modern analytical techniques.',
-      category: 'data',
-      level: 'Beginner',
-      instructor: 'Michael Chen',
-      rating: '4.7',
-      duration: '58min',
-      lessons: '13',
-      students: '2.1k',
-      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-      modules: [
-        {
-          title: 'Data Analytics Fundamentals',
-          content: 'Understanding data types, collection methods, and basic statistical concepts.',
-          lectures: 5,
-          duration: '30min'
-        },
-        {
-          title: 'Data Visualization Techniques',
-          content: 'Learn to create compelling visualizations using various tools and libraries.',
-          lectures: 8,
-          duration: '28min'
-        }
-      ]
-    }
-  ];
+  const navigate = useNavigate();
 
   const filters = [
     { id: "all", label: "All Courses", icon: BookOpen },
@@ -114,36 +29,43 @@ export default function CoursePage() {
     const fetchCoursesData = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         
-        // Try to fetch courses from backend, but don't fail if it's not available
-        let backendCourses = [];
-        try {
-          const allCoursesResponse = await api.get('/courses/all');
-          backendCourses = allCoursesResponse.data;
-        } catch (backendError) {
-          console.log('Backend courses not available, using hardcoded courses only');
-        }
+        // Fetch all courses from the backend
+        console.log('Fetching all courses...');
+        const allCoursesResponse = await api.get('/courses/all');
+        console.log('All courses response:', allCoursesResponse.data);
         
-        // Combine hardcoded courses with backend courses
-        const allCourses = [...hardcodedCourses, ...backendCourses];
-        setCourses(allCourses);
+        // Format courses with fallback values
+        const formattedCourses = allCoursesResponse.data.map(course => ({
+          ...course,
+          imageUrl: course.imageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop&auto=format',
+          duration: course.duration || '6 weeks',
+          rating: course.rating || 4.5,
+          lessons: course.lessons || course.modules?.length || 12,
+          students: course.students || Math.floor(Math.random() * 1000) + 100,
+          category: course.category || 'web'
+        }));
+        
+        setCourses(formattedCourses);
 
-        // Try to get enrolled courses if user is logged in
+        // Fetch the user's enrolled courses if a token exists
         const token = localStorage.getItem('token');
         if (token) {
           try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
             const enrolledResponse = await api.get('/courses/enrolled', config);
-            const enrolledIds = new Set(enrolledResponse.data.map(course => course._id));
+            console.log('Enrolled courses:', enrolledResponse.data);
+            const enrolledIds = new Set(enrolledResponse.data.map(course => course._id || course.id));
             setEnrolledCourseIds(enrolledIds);
-          } catch (enrolledError) {
-            console.log('Could not fetch enrolled courses');
+          } catch (enrollError) {
+            console.warn('Could not fetch enrolled courses:', enrollError);
+            // Don't throw error here, just continue without enrolled status
           }
         }
       } catch (err) {
-        console.error('Error in fetchCoursesData:', err);
-        // If everything fails, just use hardcoded courses
-        setCourses(hardcodedCourses);
+        console.error('Error fetching courses:', err);
+        setError('Failed to fetch courses. Please try again later.');
       } finally {
         setIsLoading(false);
       }
@@ -155,6 +77,7 @@ export default function CoursePage() {
     const token = localStorage.getItem('token');
     if (!token) {
       alert("Please log in to enroll in a course.");
+      navigate('/login');
       return;
     }
 
@@ -163,9 +86,9 @@ export default function CoursePage() {
       await api.post('/courses/enroll', { courseId }, config);
       setEnrolledCourseIds(prevIds => new Set(prevIds).add(courseId));
       alert("Successfully enrolled in the course!");
-      // Redirect to the course details page immediately after enrollment
       navigate(`/courses/${courseId}`);
     } catch (err) {
+      console.error('Enrollment error:', err);
       alert(`Enrollment failed: ${err.response?.data?.message || err.message}`);
     }
   };
@@ -176,15 +99,18 @@ export default function CoursePage() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-white/95 backdrop-blur-md flex items-center justify-center z-50">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 w-16 h-16 border-4 border-gray-200 rounded-full"></div>
-            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-purple-600 border-r-purple-600 rounded-full animate-spin"></div>
+      <>
+        <Header />
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="relative w-16 h-16 mx-auto mb-4">
+              <div className="absolute inset-0 w-16 h-16 border-4 border-gray-200 rounded-full"></div>
+              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-purple-600 border-r-purple-600 rounded-full animate-spin"></div>
+            </div>
+            <div className="text-gray-600 font-medium animate-pulse">Loading amazing courses...</div>
           </div>
-          <div className="text-gray-600 font-medium animate-pulse">Loading amazing courses...</div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -192,217 +118,25 @@ export default function CoursePage() {
     return (
       <>
         <Header />
-        <div className="container mx-auto p-8 text-center text-red-500">{error}</div>
+        <div className="container mx-auto p-8 text-center">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Retry
+          </button>
+        </div>
         <Footer />
       </>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden">
-      <Header />
-      
-      {/* Main Container with Perfect Centering */}
-      <div className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          
-          {/* Enhanced Header with Perfect Alignment */}
-          <div className="text-center mb-20 animate-fadeInUp">
-            <div className="flex justify-center mb-8">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 px-6 py-3 rounded-full text-sm font-semibold shadow-lg animate-bounce border border-purple-200">
-                <Star className="w-4 h-4" />
-                Featured Courses
-              </div>
-            </div>
-            
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 bg-clip-text text-transparent mb-8 animate-gradient leading-tight">
-              Explore Our Courses
-            </h2>
-            
-            <div className="max-w-4xl mx-auto">
-              <p className="text-gray-600 text-xl md:text-2xl leading-relaxed font-light">
-                Personalized learning paths designed to bridge your skill gaps and accelerate your career with industry experts.
-              </p>
-            </div>
-          </div>
-
-          {/* Enhanced Filters with Perfect Grid Alignment */}
-          <div className="mb-20 animate-fadeInUp animation-delay-200">
-            <div className="flex justify-center">
-              <div className="inline-flex flex-wrap justify-center gap-3 p-2 bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20">
-                {filters.map((filter, index) => {
-                  const IconComponent = filter.icon;
-                  return (
-                    <button
-                      key={filter.id}
-                      onClick={() => setSelectedFilter(filter.id)}
-                      className={`group relative px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 min-w-[140px] ${
-                        selectedFilter === filter.id
-                          ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25"
-                          : "bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:text-purple-600 border border-gray-200/50 hover:border-purple-300 hover:shadow-md"
-                      }`}
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div className="flex flex-col items-center gap-2">
-                        <IconComponent className="w-5 h-5 transition-transform group-hover:rotate-12" />
-                        <span className="text-sm">{filter.label}</span>
-                      </div>
-                      
-                      {/* Active indicator */}
-                      {selectedFilter === filter.id && (
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Enhanced Courses Grid with Perfect Alignment */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-20">
-          {filteredCourses.map((course, index) => {
-            const isEnrolled = enrolledCourseIds.has(course._id); // Check if the user is enrolled
-            return (
-              <Link
-                key={course._id}
-                to={`/courses/${course._id}`}
-                className="group relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-6 hover:rotate-1 animate-fadeInUp h-full flex flex-col cursor-pointer"
-                style={{ animationDelay: `${index * 150}ms` }}
-                onMouseEnter={() => setHoveredCard(index)}
-                onMouseLeave={() => setHoveredCard(null)}
-              >
-                {/* Course Image with Enhanced Overlay */}
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={course.imageUrl} // Use imageUrl from the backend
-                    alt={course.title}
-                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-125 group-hover:rotate-2"
-                  />
-                  
-                  {/* Multi-layer Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                  {/* Category Badge with Animation */}
-                  <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm text-purple-700 text-sm font-bold px-4 py-2 rounded-full shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                    {course.category}
-                  </div>
-
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <div className="w-20 h-20 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
-                      <Play className="w-8 h-8 text-purple-600 ml-1" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Enhanced Course Info with Perfect Spacing */}
-                <div className="p-8 flex-1 flex flex-col">
-                  {/* Level Indicator */}
-                  <div className="flex justify-between items-center mb-6">
-                    <span className={`text-sm font-semibold px-4 py-2 rounded-full ${
-                      course.level === 'Beginner' ? 'bg-green-100 text-green-700' :
-                      course.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {course.level}
-                    </span>
-                  </div>
-
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-purple-700 transition-colors duration-300 leading-tight">
-                    {course.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 mb-8 line-clamp-2 leading-relaxed flex-1">
-                    {course.description}
-                  </p>
-
-                  {/* Instructor & Lessons with Enhanced Spacing */}
-                  <div className="flex items-center justify-between mb-8 text-sm text-gray-500 pb-6 border-b border-gray-100">
-                    <div className="flex items-center gap-2 font-medium">
-                      <Users className="w-5 h-5 text-purple-500" /> 
-                      <span>{course.instructor}</span>
-                    </div>
-                    <div className="bg-gray-100 px-4 py-2 rounded-full text-sm font-semibold">
-                      {course.lessons} Lessons
-                    </div>
-                  </div>
-
-                  {/* Enhanced Stats - Better Alignment */}
-                  <div className="grid grid-cols-3 gap-4 mb-8 bg-gradient-to-r from-gray-50 to-purple-50 rounded-2xl p-6 group-hover:from-purple-50 group-hover:to-indigo-50 transition-colors duration-300">
-                    <div className="text-center">
-                      <Clock className="w-5 h-5 text-blue-500 mx-auto mb-2" />
-                      <div className="font-semibold text-gray-700 text-sm">{course.duration}</div>
-                    </div>
-                    <div className="text-center">
-                      <Star className="w-5 h-5 text-yellow-500 mx-auto mb-2" />
-                      <div className="font-semibold text-gray-700 text-sm">{course.rating}</div>
-                    </div>
-                    <div className="text-center">
-                      <BookOpen className="w-5 h-5 text-green-500 mx-auto mb-2" />
-                      <div className="font-semibold text-gray-700 text-sm">{course.students}</div>
-                    </div>
-                  </div>
-                  
-                  {/* Status Indicator */}
-                  <div className="w-full flex items-center justify-center gap-3 py-5 rounded-2xl transition-all duration-300 font-bold text-lg shadow-lg mt-auto">
-                    {isEnrolled ? (
-                      <div className="flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full">
-                        <span>Start Learning</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-full">
-                        <span>View Course</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Hover Glow Effect */}
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                
-                {/* Card Border Glow */}
-                <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-purple-300/50 transition-colors duration-500"></div>
-              </Link>
-            );
-          })}
-          </div>
-
-          {/* Enhanced Stats Section with Perfect Alignment */}
-          <div className="text-center animate-fadeInUp animation-delay-1000">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-12 border border-white/20">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                <div className="group p-8 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="text-4xl font-bold text-purple-600 mb-3 group-hover:scale-110 transition-transform duration-300">500+</div>
-                  <div className="text-gray-600 font-medium">Courses Available</div>
-                </div>
-                
-                <div className="group p-8 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="text-4xl font-bold text-indigo-600 mb-3 group-hover:scale-110 transition-transform duration-300">50k+</div>
-                  <div className="text-gray-600 font-medium">Students Enrolled</div>
-                </div>
-                
-                <div className="group p-8 bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="text-4xl font-bold text-pink-600 mb-3 group-hover:scale-110 transition-transform duration-300">98%</div>
-                  <div className="text-gray-600 font-medium">Satisfaction Rate</div>
-                </div>
-                
-                <div className="group p-8 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="text-4xl font-bold text-green-600 mb-3 group-hover:scale-110 transition-transform duration-300">24/7</div>
-                  <div className="text-gray-600 font-medium">Support Available</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Footer />
-
-      <style jsx>{`
+    <>
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -414,40 +148,54 @@ export default function CoursePage() {
           }
         }
         
-        @keyframes gradient {
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        @keyframes float-reverse {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(20px) rotate(-5deg); }
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        
+        @keyframes gradient-text {
           0%, 100% {
-            background-size: 200% 200%;
-            background-position: left center;
+            background-position: 0% 50%;
           }
           50% {
-            background-size: 200% 200%;
-            background-position: right center;
+            background-position: 100% 50%;
           }
         }
         
-        .animate-fadeInUp {
+        .animate-fade-in-up {
           animation: fadeInUp 0.8s ease-out forwards;
         }
         
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 3s ease infinite;
+        .animate-float-slow {
+          animation: float-slow 6s ease-in-out infinite;
         }
         
-        .animation-delay-200 {
-          animation-delay: 200ms;
+        .animate-float-reverse {
+          animation: float-reverse 8s ease-in-out infinite;
         }
         
-        .animation-delay-1000 {
-          animation-delay: 1000ms;
+        .animate-pulse-slow {
+          animation: pulse-slow 4s ease-in-out infinite;
         }
         
-        .animation-delay-2000 {
-          animation-delay: 2000ms;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4000ms;
+        .animate-gradient-text {
+          background: linear-gradient(-45deg, #9333ea, #4f46e5, #0ea5e9);
+          background-size: 400% 400%;
+          animation: gradient-text 4s ease infinite;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: transparent;
         }
         
         .line-clamp-2 {
@@ -456,7 +204,233 @@ export default function CoursePage() {
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
+        
+        .delay-300 { animation-delay: 300ms; }
+        .delay-500 { animation-delay: 500ms; }
       `}</style>
-    </div>
+      
+      <div className="relative min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden">
+        <Header />
+        
+        {/* Background Animation Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-purple-400/5 to-indigo-400/5 rounded-full blur-3xl animate-float-slow"></div>
+          <div className="absolute bottom-32 right-32 w-80 h-80 bg-gradient-to-r from-blue-400/5 to-purple-400/5 rounded-full blur-3xl animate-float-reverse"></div>
+          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-gradient-to-r from-indigo-300/3 to-pink-300/3 rounded-full blur-2xl animate-pulse-slow"></div>
+        </div>
+
+        <section className="relative z-10 py-20 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto">
+          
+          {/* Header Section */}
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent mb-6 animate-gradient-text">
+              Discover Amazing Courses
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Unlock your potential with our comprehensive collection of courses designed by industry experts
+            </p>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-fade-in-up delay-300">
+            {filters.map((filter, index) => {
+              const Icon = filter.icon;
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => setSelectedFilter(filter.id)}
+                  className={`group flex items-center gap-3 px-6 py-3 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 animate-fade-in-up ${
+                    selectedFilter === filter.id
+                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg"
+                      : "bg-white/70 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md"
+                  }`}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <Icon className="w-5 h-5 group-hover:animate-bounce" />
+                  <span>{filter.label}</span>
+                  {selectedFilter === filter.id && (
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Course Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16 animate-fade-in-up delay-500">
+            {[
+              { icon: BookOpen, label: "Total Courses", value: courses.length, color: "purple" },
+              { icon: Users, label: "Active Students", value: "10,000+", color: "blue" },
+              { icon: Star, label: "Average Rating", value: "4.8", color: "yellow" },
+              { icon: Award, label: "Certificates", value: "5,000+", color: "green" }
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div 
+                  key={index}
+                  className="group bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-105 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 100 + 500}ms` }}
+                >
+                  <div className={`w-12 h-12 bg-gradient-to-r ${
+                    stat.color === 'purple' ? 'from-purple-500 to-purple-600' :
+                    stat.color === 'blue' ? 'from-blue-500 to-blue-600' :
+                    stat.color === 'yellow' ? 'from-yellow-500 to-yellow-600' :
+                    'from-green-500 to-green-600'
+                  } rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className="w-6 h-6 text-white group-hover:animate-bounce" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-1 group-hover:text-purple-700 transition-colors duration-300">
+                    {stat.value}
+                  </h3>
+                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+                    {stat.label}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        
+          {/* Debug Info */}
+          {courses.length === 0 && !isLoading && (
+            <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl mb-8">
+              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No courses found</h3>
+              <p className="text-gray-500 mb-4">
+                {selectedFilter === "all" 
+                  ? "No courses are available at the moment."
+                  : `No courses found in the "${selectedFilter}" category.`
+                }
+              </p>
+              <button 
+                onClick={() => setSelectedFilter("all")}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-300"
+              >
+                View All Courses
+              </button>
+            </div>
+          )}
+
+          {/* Enhanced Courses Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredCourses.map((course, index) => {
+              const isEnrolled = enrolledCourseIds.has(course._id); // Check if the user is enrolled
+              return (
+                <div
+                  key={course._id}
+                  className="group relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-4 hover:rotate-1 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 150}ms` }}
+                  onMouseEnter={() => setHoveredCard(index)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                >
+                  {/* Course Image with Enhanced Overlay */}
+                  <div className="relative h-56 overflow-hidden">
+                    <img
+                      src={course.imageUrl}
+                      alt={course.title}
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-125 group-hover:rotate-2"
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop&auto=format';
+                      }}
+                    />
+                    
+                    {/* Multi-layered Gradient Overlays */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                      {course.category.charAt(0).toUpperCase() + course.category.slice(1)}
+                    </div>
+                    
+                    {/* Enrollment Status Badge */}
+                    {isEnrolled && (
+                      <div className="absolute top-4 right-4 bg-green-500/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        Enrolled
+                      </div>
+                    )}
+                    
+                    {/* Play Button Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
+                      <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                        <Play className="w-6 h-6 text-purple-600 ml-1" />
+                      </div>
+                    </div>
+                    
+                    {/* Floating Action Bubbles */}
+                    <div className={`absolute bottom-4 right-4 flex gap-2 transition-all duration-500 ${hoveredCard === index ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+                      <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 cursor-pointer">
+                        <Star className="w-4 h-4 text-yellow-500" />
+                      </div>
+                      <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 cursor-pointer">
+                        <BookOpen className="w-4 h-4 text-blue-500" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Course Info with Conditional Buttons */}
+                  <div className="p-8 relative">
+                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-purple-700 transition-colors duration-300 leading-tight">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-6 line-clamp-2 leading-relaxed">
+                      {course.description || "Enhance your skills with this comprehensive course designed for all skill levels."}
+                    </p>
+                    
+                    <div className="flex items-center justify-between mb-6 text-sm text-gray-500 pb-4 border-b border-gray-100">
+                      <span className="flex items-center gap-2 font-medium">
+                        <Users className="w-4 h-4 text-purple-500" /> 
+                        {course.instructor}
+                      </span>
+                      <span className="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-semibold">
+                        {course.lessons} Lessons
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center mb-8 text-sm bg-gray-50 rounded-xl p-4 group-hover:bg-purple-50 transition-colors duration-300">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-blue-500" />
+                        <span className="font-semibold text-gray-700">{course.duration}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-500" />
+                        <span className="font-semibold text-gray-700">{course.rating}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-green-500" />
+                        <span className="font-semibold text-gray-700">{course.students}</span>
+                      </div>
+                    </div>
+                    
+                    {isEnrolled ? (
+                      <Link
+                        to={`/courses/${course._id}`}
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 font-semibold text-sm shadow-lg hover:shadow-xl transform hover:scale-105 group/button"
+                      >
+                        <span>Continue Learning</span>
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover/button:translate-x-1" />
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => handleEnroll(course._id)}
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 font-semibold text-sm shadow-lg hover:shadow-xl transform hover:scale-105 group/button"
+                      >
+                        <span>Enroll Now</span>
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover/button:translate-x-1" />
+                      </button>
+                    )}
+                    
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+        
+        <Footer />
+      </div>
+    </>
   );
 }

@@ -5,7 +5,7 @@ import Footer from '../components/common/Footer';
 import { Star, Award, Flame, BookCheck, Gauge, User, Play, Clock, ArrowRight } from "lucide-react";
 import api from '../services/api';
 
-// Custom Progress Component (from your code)
+// Custom Progress Component
 const Progress = ({ value }) => (
   <div className="w-full bg-gray-200 rounded-full h-2 mt-2 relative overflow-hidden">
     <div 
@@ -32,17 +32,17 @@ export default function DashboardPage() {
   };
 
   const completedCoursesCount = enrolledCourses.filter(course => course.progress === 100).length;
-  // This is hardcoded for now, you would fetch this from your backend in a later phase
   const currentUserPoints = 75;
 
-  // This effect fetches user data and enrolled courses from the backend
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          throw new Error("No token found");
+          navigate("/login");
+          return;
         }
+        
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
         // Fetch user profile
@@ -51,34 +51,71 @@ export default function DashboardPage() {
 
         // Fetch enrolled courses
         const coursesResponse = await api.get('/courses/enrolled', config);
-        // Add mock progress data for now, until you implement progress tracking
         const formattedCourses = coursesResponse.data.map(course => ({
           ...course,
           progress: Math.floor(Math.random() * 101),
-          type: "ongoing", // Placeholder type
-          category: "Web Development", // Placeholder category
-          level: "Intermediate", // Placeholder level
-          duration: "12 hrs", // Placeholder duration
-          image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop&auto=format", // Placeholder image
+          type: "ongoing",
+          category: "Web Development",
+          level: "Intermediate",
+          duration: "12 hrs",
+          image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop&auto=format",
         }));
         setEnrolledCourses(formattedCourses);
       } catch (err) {
         console.error("Dashboard data fetch error:", err);
-        setError("Failed to fetch user profile or courses. Please log in.");
+        if (err.response?.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          navigate("/login");
+        } else {
+          setError("Failed to fetch dashboard data. Please try again.");
+        }
       } finally {
         setLoading(false);
       }
     };
+    
     fetchDashboardData();
-  }, []);
+  }, [navigate]);
 
-  const filteredCourses =
-    filter === "all"
-      ? enrolledCourses
-      : enrolledCourses.filter((course) => course.type === filter);
+  const filteredCourses = filter === "all" 
+    ? enrolledCourses 
+    : enrolledCourses.filter((course) => course.type === filter);
 
-  if (loading) return <div>Loading dashboard...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <p>Error: {error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -116,7 +153,7 @@ export default function DashboardPage() {
               <div className="text-center sm:text-left flex-grow">
                 {/* Greeting with dynamic name */}
                 <h2 className="text-2xl font-bold text-purple-800 animate-gradient-text">
-                  Hello, {user ? user.fullName : 'User'}!
+                  Hello, {user?.fullName || user?.name || 'User'}!
                 </h2>
 
                 {/* Stats Grid with Enhanced Animations */}
@@ -129,7 +166,7 @@ export default function DashboardPage() {
                       <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-lg group-hover:animate-pulse"></div>
                     </div>
                     <p className="font-semibold text-gray-700 text-lg group-hover:text-blue-700 transition-colors duration-300">
-                      75/100
+                      {currentUserPoints}/100
                     </p>
                     <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-300">
                       Current Points
@@ -185,12 +222,12 @@ export default function DashboardPage() {
               Your Learning Journey
             </h3>
             
-            {/* NEW FILTER TABS */}
+            {/* FILTER TABS */}
             <div className="flex space-x-4 mb-6">
               {["all", "ongoing", "completed", "popular"].map((tab, index) => (
                 <button
                   key={tab}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 animate-fade-in-up ${
                     filter === tab
                       ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg animate-pulse-gentle"
                       : "bg-gray-200/80 backdrop-blur-sm text-gray-700 hover:bg-gray-300/80 hover:shadow-md"
@@ -206,7 +243,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {filteredCourses.map((course, index) => (
                 <div
-                  key={course.id}
+                  key={course.id || index}
                   className="group bg-gradient-to-br from-gray-50/80 to-gray-100/80 backdrop-blur-sm p-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-500 transform hover:-translate-y-4 hover:scale-105 animate-fade-in-up border border-white/20"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
@@ -214,8 +251,11 @@ export default function DashboardPage() {
                   <div className="relative rounded-lg h-40 w-full mb-4 overflow-hidden group-hover:scale-105 transition-transform duration-500">
                     <img
                       src={course.image}
-                      alt={course.title}
+                      alt={course.title || 'Course'}
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop&auto=format';
+                      }}
                     />
                     
                     {/* Multi-layer Gradient Overlay */}
@@ -266,13 +306,13 @@ export default function DashboardPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
                       <h4 className="text-lg font-semibold text-gray-700 group-hover:text-indigo-700 transition-colors duration-300 leading-tight">
-                        {course.title}
+                        {course.title || 'Course Title'}
                       </h4>
                       <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
                         course.level === 'Beginner' ? 'bg-green-100 text-green-700' :
                         course.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-red-100 text-red-700'
-                      }`.trim()}>
+                      }`}>
                         {course.level}
                       </span>
                     </div>
@@ -318,7 +358,7 @@ export default function DashboardPage() {
               ].map((achievement, index) => (
                 <div 
                   key={index}
-                  className={`group bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm p-4 rounded-xl shadow-md hover:shadow-lg w-40 text-center transform hover:-translate-y-2 hover:scale-105 transition-all duration-300 animate-fade-in-up`}
+                  className="group bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm p-4 rounded-xl shadow-md hover:shadow-lg w-40 text-center transform hover:-translate-y-2 hover:scale-105 transition-all duration-300 animate-fade-in-up"
                   style={{ animationDelay: `${achievement.delay}ms` }}
                 >
                   <div className="text-2xl mb-2 group-hover:animate-bounce transition-all duration-300">
@@ -345,7 +385,11 @@ export default function DashboardPage() {
               ].map((activity, index) => (
                 <div 
                   key={index}
-                  className={`group border-l-4 border-${activity.color}-500 pl-4 transform hover:translate-x-2 transition-all duration-300 animate-fade-in-up hover:bg-${activity.color}-50/30 rounded-r-lg py-2`}
+                  className={`group border-l-4 ${
+                    activity.color === 'purple' ? 'border-purple-500' :
+                    activity.color === 'blue' ? 'border-blue-500' :
+                    'border-green-500'
+                  } pl-4 transform hover:translate-x-2 transition-all duration-300 animate-fade-in-up hover:bg-gray-50/50 rounded-r-lg py-2`}
                   style={{ animationDelay: `${activity.delay}ms` }}
                 >
                   <p className="text-sm text-gray-700 group-hover:text-gray-800 transition-colors duration-300">
@@ -370,11 +414,6 @@ export default function DashboardPage() {
           @keyframes float-reverse {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(20px) rotate(-5deg); }
-          }
-          
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
           }
           
           @keyframes pulse-slow {
@@ -409,26 +448,6 @@ export default function DashboardPage() {
             }
           }
           
-          @keyframes gradient-x {
-            0%, 100% {
-              transform: translateX(0%);
-            }
-            50% {
-              transform: translateX(100%);
-            }
-          }
-          
-          @keyframes gradient-text {
-            0%, 100% {
-              background-size: 200% 200%;
-              background-position: left center;
-            }
-            50% {
-              background-size: 200% 200%;
-              background-position: right center;
-            }
-          }
-          
           @keyframes shimmer {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
@@ -445,10 +464,6 @@ export default function DashboardPage() {
           
           .animate-float-reverse {
             animation: float-reverse 8s ease-in-out infinite;
-          }
-          
-          .animate-float {
-            animation: float 4s ease-in-out infinite;
           }
           
           .animate-pulse-slow {
@@ -471,10 +486,6 @@ export default function DashboardPage() {
             animation: fade-in-up 0.8s ease-out forwards;
           }
           
-          .animate-gradient-x {
-            animation: gradient-x 15s ease infinite;
-          }
-          
           .animate-gradient-text {
             background: linear-gradient(-45deg, #6366f1, #8b5cf6, #06b6d4, #10b981);
             background-size: 400% 400%;
@@ -482,6 +493,15 @@ export default function DashboardPage() {
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+          }
+          
+          @keyframes gradient-text {
+            0%, 100% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
           }
           
           .animate-shimmer {
@@ -500,17 +520,9 @@ export default function DashboardPage() {
           .delay-700 { animation-delay: 700ms; }
           .delay-800 { animation-delay: 800ms; }
           .delay-1000 { animation-delay: 1000ms; }
-          
-          .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
         `}</style>
       </div>
       <Footer />
     </>
   );
 }
-

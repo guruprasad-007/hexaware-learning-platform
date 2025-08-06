@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/auth", // Your backend URL
+  baseURL: "http://localhost:5000/api/auth",
+  withCredentials: true  // Your backend URL
 });
 
 // If token is stored in localStorage, attach it to all requests

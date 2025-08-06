@@ -63,6 +63,7 @@ def process_voice_command():
     except Exception as e:
         print(f"Error processing voice command: {e}")
         return jsonify({"action": "respond", "response": "An internal error occurred while processing your voice command."}), 500
+    
 @app.route('/generate_quiz', methods=['GET'])
 def generate_quiz_route():
     topic = request.args.get('topic')

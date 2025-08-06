@@ -1,269 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+// frontend/src/pages/CourseDetailPage.jsx
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { BookOpen, Users, Clock, Star, PlayCircle, Zap } from "lucide-react";
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import api from '../services/api';
-import { BookOpen, Star, Clock, Users, ArrowRight, ChevronDown, ChevronUp, PlayCircle } from "lucide-react";
 
-export default function CourseDetailsPage() {
+export default function CourseDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [course, setCourse] = useState(null);
-    const [isEnrolled, setIsEnrolled] = useState(true); // Hardcoded for demonstration
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [expandedSections, setExpandedSections] = useState(new Set());
+    const [loadingContent, setLoadingContent] = useState(false);
+    const [contentStatus, setContentStatus] = useState('');
 
-    // Hardcoded courses data
-    const hardcodedCourses = [
-        {
-            _id: 'hardcoded-1',
-            title: 'Introduction to the Course',
-            description: 'Get started with the fundamentals of web development and learn the essential skills needed to build modern web applications.',
-            category: 'web',
-            level: 'Beginner',
-            instructor: 'John Smith',
-            rating: '4.8',
-            duration: '3min',
-            lessons: '2',
-            students: '1.2k',
-            imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-            modules: [
-                {
-                    title: 'Introduction to the Course',
-                    content: 'Welcome to the comprehensive web development course where you will learn HTML, CSS, JavaScript and modern frameworks.',
-                    lectures: 2,
-                    duration: '3min',
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                },
-                {
-                    title: 'Setting up Development Environment',
-                    content: 'Learn how to set up your development environment with VS Code, Node.js, and essential extensions.',
-                    lectures: 3,
-                    duration: '15min',
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                }
-            ]
-        },
-        {
-            _id: 'hardcoded-2',
-            title: 'Leveraging Generative AI for Data Analytics [NEW]',
-            description: 'Master the power of generative AI tools like ChatGPT and Claude for advanced data analysis and insights generation.',
-            category: 'ai',
-            level: 'Intermediate',
-            instructor: 'Dr. Sarah Johnson',
-            rating: '4.9',
-            duration: '1hr 29min',
-            lessons: '7',
-            students: '850',
-            imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-            modules: [
-                {
-                    title: 'Understanding Generative AI Basics',
-                    content: 'Explore the fundamentals of generative AI and its applications in data analytics.',
-                    lectures: 3,
-                    duration: '25min',
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                },
-                {
-                    title: 'Introduction to AI Tools (ChatGPT, Grok.com)',
-                    content: 'Get hands-on experience with popular AI tools and learn how to integrate them into your data analysis workflow.',
-                    lectures: 2,
-                    duration: '20min',
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                },
-                {
-                    title: 'Prompt Engineering for Data Analysis',
-                    content: 'Learn effective prompt engineering techniques for data analysis tasks. Master the art of crafting prompts that generate accurate insights.',
-                    lectures: 4,
-                    duration: '44min',
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                }
-            ]
-        },
-        {
-            _id: 'hardcoded-3',
-            title: 'Introduction to Data Analytics',
-            description: 'Comprehensive introduction to data analytics covering statistics, visualization, and modern analytical techniques.',
-            category: 'data',
-            level: 'Beginner',
-            instructor: 'Michael Chen',
-            rating: '4.7',
-            duration: '58min',
-            lessons: '13',
-            students: '2.1k',
-            imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-            modules: [
-                {
-                    title: 'Data Analytics Fundamentals',
-                    content: 'Understanding data types, collection methods, and basic statistical concepts.',
-                    lectures: 5,
-                    duration: '30min',
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                },
-                {
-                    title: 'Data Visualization Techniques',
-                    content: 'Learn to create compelling visualizations using various tools and libraries.',
-                    lectures: 8,
-                    duration: '28min',
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                }
-            ]
+    const fetchCourse = async () => {
+        try {
+            const { data } = await api.get(`/courses/${id}`);
+            setCourse(data);
+        } catch (error) {
+            console.error("Error fetching course:", error);
+            setContentStatus('Error loading course details.');
         }
-    ];
-
-    const toggleSection = (index) => {
-        setExpandedSections(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(index)) {
-                newSet.delete(index);
-            } else {
-                newSet.add(index);
-            }
-            return newSet;
-        });
     };
 
     useEffect(() => {
-        const hardcodedCourse = hardcodedCourses.find(course => course._id === id);
-        if (hardcodedCourse) {
-            setCourse(hardcodedCourse);
-            setIsLoading(false);
-        } else {
-            setError('Course not found.');
-            setIsLoading(false);
+        if (id) {
+            fetchCourse();
         }
     }, [id]);
 
-    const handleEnroll = async () => {
+    const handleGenerateContent = async () => {
+        setLoadingContent(true);
+        setContentStatus('');
         const token = localStorage.getItem('token');
+
         if (!token) {
-            alert("Please log in to enroll in a course.");
+            setContentStatus("Please log in to generate content.");
+            navigate('/login');
+            setLoadingContent(false);
             return;
         }
 
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await api.post('/courses/enroll', { courseId: id }, config);
-            setIsEnrolled(true);
-            alert("Successfully enrolled in the course!");
-        } catch (err) {
-            alert(`Enrollment failed: ${err.response?.data?.message || err.message}`);
+            const response = await api.post(`/courses/${id}/generate-content`, {}, config);
+            setContentStatus(response.data.message);
+            await fetchCourse(); // Re-fetch course to update UI with new content
+        } catch (error) {
+            console.error("Error generating course content:", error);
+            setContentStatus(`Failed to generate content: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setLoadingContent(false);
         }
     };
 
-    if (isLoading) return <div>Loading course details...</div>;
-    if (error) return <div>Error: {error}</div>;
-    if (!course) return <div>Course not found.</div>;
+    // New handler to navigate to QuizPage
+    const handleTakeQuiz = (lessonNumber) => {
+        // Navigate to the QuizPage, passing course ID and lesson number
+        navigate(`/courses/${id}/quiz/${lessonNumber}`);
+    };
+
+    if (!course) {
+        return (
+            <>
+                <Header />
+                <div className="fixed inset-0 bg-white/95 backdrop-blur-md flex items-center justify-center z-50">
+                    <div className="text-center">
+                        <div className="relative w-16 h-16 mx-auto mb-4">
+                            <div className="absolute inset-0 w-16 h-16 border-4 border-gray-200 rounded-full"></div>
+                            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-purple-600 border-r-purple-600 rounded-full animate-spin"></div>
+                        </div>
+                        <div className="text-gray-600 font-medium animate-pulse">Loading course details...</div>
+                    </div>
+                </div>
+                <Footer />
+            </>
+        );
+    }
 
     return (
-        <>
+        <div className="min-h-screen flex flex-col bg-gray-50">
             <Header />
-            <main className="container mx-auto p-8">
-                {/* Course Main Details Section */}
-                <div className="relative overflow-hidden rounded-3xl shadow-2xl bg-white/90 backdrop-blur-sm p-12">
-                    <div className="md:flex md:space-x-12">
-                        <div className="md:w-1/3 flex-shrink-0">
-                            <img src={course.imageUrl} alt={course.title} className="rounded-2xl w-full h-auto object-cover shadow-lg" />
+
+            <main className="flex-1 p-6 max-w-5xl mx-auto w-full">
+                <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
+                    <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{course.title}</h1>
+                    <p className="text-gray-700 text-lg mb-6">{course.description}</p>
+
+                    <div className="flex flex-wrap items-center gap-6 text-md text-gray-600 mb-8">
+                        <div className="flex items-center gap-2">
+                            <BookOpen size={20} className="text-indigo-500" /> {course.lessons || 0} Lessons
                         </div>
-                        <div className="mt-8 md:mt-0 md:w-2/3">
-                            <h1 className="text-4xl font-bold text-gray-800 mb-4">{course.title}</h1>
-                            <p className="text-xl text-gray-600 mb-6">{course.description}</p>
-
-                            <div className="flex flex-wrap gap-6 mb-8 text-sm font-semibold text-gray-700">
-                                <div className="flex items-center gap-2">
-                                    <Users className="w-5 h-5 text-purple-600" />
-                                    <span>{course.instructor}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Star className="w-5 h-5 text-yellow-500" />
-                                    <span>{course.rating} Rating</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-blue-500" />
-                                    <span>{course.duration}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <BookOpen className="w-5 h-5 text-green-500" />
-                                    <span>{course.lessons} Lessons</span>
-                                </div>
-                            </div>
-
-                            {isEnrolled ? (
-                                <button className="py-4 px-8 bg-green-500 text-white font-bold rounded-xl shadow-lg">Start Learning</button>
-                            ) : (
-                                <button onClick={handleEnroll} className="py-4 px-8 bg-purple-600 text-white font-bold rounded-xl shadow-lg hover:bg-purple-700 transition-colors">Enroll Now</button>
-                            )}
+                        <div className="flex items-center gap-2">
+                            <Users size={20} className="text-blue-500" /> {course.enrolledCount || 0} Students
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Clock size={20} className="text-purple-500" /> {course.duration || 'N/A'}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Star size={20} className="text-yellow-500" /> {course.rating || 0}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Zap size={20} className="text-red-500" /> {course.category || 'N/A'}
                         </div>
                     </div>
+
+                    <div className="flex items-center gap-4">
+                        <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md">
+                            <PlayCircle size={20} /> Start Learning
+                        </button>
+                        
+                        {/* Generate Content Button */}
+                        <button 
+                            onClick={handleGenerateContent} 
+                            className="flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={loadingContent}
+                        >
+                            {loadingContent ? 'Generating...' : 'Generate Content (Videos & Quizzes)'}
+                        </button>
+                    </div>
+                    {contentStatus && (
+                        <p className={`mt-4 text-sm ${contentStatus.startsWith('Success') ? 'text-green-600' : 'text-red-600'}`}>
+                            {contentStatus}
+                        </p>
+                    )}
                 </div>
 
-                {/* Course Content Section */}
-                <div className="mt-12">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-6">Course content</h2>
-                    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                        <div className="p-6 border-b flex justify-between items-center">
-                            <p className="text-gray-600 text-sm">
-                                {course.modules.length} sections • {course.modules.reduce((acc, curr) => acc + (curr.lectures || 0), 0)} lectures • {course.duration} total length
-                            </p>
-                            <button onClick={() => setExpandedSections(new Set(course.modules.map((_, i) => i)))} className="text-purple-600 hover:text-purple-700 font-semibold">
-                                Expand all sections
-                            </button>
-                        </div>
-                        <div className="divide-y divide-gray-200">
-                            {course.modules.map((module, index) => (
-                                <div key={index} className="bg-white hover:bg-gray-50 transition-colors">
-                                    <button
-                                        onClick={() => toggleSection(index)}
-                                        className="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none"
+                {/* Display generatedLessonContent */}
+                {course.generatedLessonContent && course.generatedLessonContent.length > 0 ? (
+                    <div className="mt-10 bg-white p-8 rounded-lg shadow-lg">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-6">Course Lessons</h2>
+                        {course.generatedLessonContent.map((lesson, index) => (
+                            <div key={index} className="mb-10 border-b pb-8 last:border-b-0 last:pb-0">
+                                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Lesson {lesson.lessonNumber}: {lesson.title}</h3>
+                                {lesson.youtubeVideo && lesson.youtubeVideo.embedUrl ? (
+                                    <div className="aspect-video w-full mb-4 rounded-lg overflow-hidden shadow-md">
+                                        <iframe
+                                            src={lesson.youtubeVideo.embedUrl}
+                                            title={lesson.youtubeVideo.title || "YouTube Video"}
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            className="w-full h-full"
+                                        ></iframe>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 italic">Video not available for this lesson. Try generating content!</p>
+                                )}
+                                
+                                {/* Take Quiz Button */}
+                                {lesson.quiz && lesson.quiz.isGenerated && lesson.quiz.questions && lesson.quiz.questions.length > 0 && (
+                                    <button 
+                                        onClick={() => handleTakeQuiz(lesson.lessonNumber)}
+                                        className="mt-4 flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-md"
                                     >
-                                        <span className="flex items-center gap-4">
-                                            {expandedSections.has(index) ? (
-                                                <ChevronUp className="w-5 h-5 text-purple-600" />
-                                            ) : (
-                                                <ChevronDown className="w-5 h-5 text-purple-600" />
-                                            )}
-                                            <span className="font-semibold text-lg text-gray-700">{module.title}</span>
-                                        </span>
-                                        <span className="text-gray-500 text-sm">
-                                            {module.lectures} lectures • {module.duration}
-                                        </span>
+                                        <PlayCircle size={20} /> Take Quiz
                                     </button>
-                                    {expandedSections.has(index) && (
-                                        <div className="px-6 py-4 text-gray-600 bg-gray-50">
-                                            <p className="mb-4">{module.content}</p>
-                                            <div className="space-y-2">
-                                                {/* Video Player */}
-                                                {module.videoUrl && (
-                                                    <div className="rounded-lg overflow-hidden shadow-lg mb-4">
-                                                        <iframe 
-                                                            className="w-full h-auto aspect-video"
-                                                            src={module.videoUrl} 
-                                                            title={module.title}
-                                                            frameBorder="0" 
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                                            allowFullScreen
-                                                        ></iframe>
-                                                    </div>
-                                                )}
-                                                {/* Link to Quiz Page */}
-                                                <Link 
-                                                    to={`/courses/${id}/quiz`}
-                                                    className="w-full py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors flex items-center justify-center gap-2"
-                                                >
-                                                    <PlayCircle className="w-5 h-5" />
-                                                    Take Quiz for this Course
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                                )}
+                            </div>
+                        ))}
                     </div>
-                </div>
+                ) : (
+                    <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl mb-8 shadow-lg">
+                        <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">No lessons available yet</h3>
+                        <p className="text-gray-500 mb-4">
+                            Use the "Generate Content" button to automatically add videos and quizzes for this course!
+                        </p>
+                    </div>
+                )}
             </main>
+
             <Footer />
-        </>
+        </div>
     );
 }
