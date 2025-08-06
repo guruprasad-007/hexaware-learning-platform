@@ -126,18 +126,18 @@ export default function CourseDetailPage() {
                     )}
                 </div>
 
-                {/* Display generatedLessonContent */}
-                {course.generatedLessonContent && course.generatedLessonContent.length > 0 ? (
+                {/* Display course.modules (CHANGED FROM generatedLessonContent) */}
+                {course.modules && course.modules.length > 0 ? (
                     <div className="mt-10 bg-white p-8 rounded-lg shadow-lg">
                         <h2 className="text-3xl font-bold text-gray-900 mb-6">Course Lessons</h2>
-                        {course.generatedLessonContent.map((lesson, index) => (
+                        {course.modules.map((module, index) => (
                             <div key={index} className="mb-10 border-b pb-8 last:border-b-0 last:pb-0">
-                                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Lesson {lesson.lessonNumber}: {lesson.title}</h3>
-                                {lesson.youtubeVideo && lesson.youtubeVideo.embedUrl ? (
+                                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Lesson {index + 1}: {module.title}</h3> {/* Using index + 1 for lesson number */}
+                                {module.youtubeVideo && module.youtubeVideo.embedUrl ? (
                                     <div className="aspect-video w-full mb-4 rounded-lg overflow-hidden shadow-md">
                                         <iframe
-                                            src={lesson.youtubeVideo.embedUrl}
-                                            title={lesson.youtubeVideo.title || "YouTube Video"}
+                                            src={module.youtubeVideo.embedUrl}
+                                            title={module.youtubeVideo.title || "YouTube Video"}
                                             frameBorder="0"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
@@ -147,11 +147,12 @@ export default function CourseDetailPage() {
                                 ) : (
                                     <p className="text-gray-500 italic">Video not available for this lesson. Try generating content!</p>
                                 )}
-                                
+                                {module.content && <p className="text-gray-700 mt-4 leading-relaxed">{module.content}</p>}
+
                                 {/* Take Quiz Button */}
-                                {lesson.quiz && lesson.quiz.isGenerated && lesson.quiz.questions && lesson.quiz.questions.length > 0 && (
+                                {module.quiz && module.quiz.isGenerated && module.quiz.questions && module.quiz.questions.length > 0 && (
                                     <button 
-                                        onClick={() => handleTakeQuiz(lesson.lessonNumber)}
+                                        onClick={() => handleTakeQuiz(index + 1)} // Pass lesson number (index + 1)
                                         className="mt-4 flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-md"
                                     >
                                         <PlayCircle size={20} /> Take Quiz

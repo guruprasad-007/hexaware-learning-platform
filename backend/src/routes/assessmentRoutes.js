@@ -2,17 +2,19 @@
 
 import express from 'express';
 const router = express.Router();
-import { generateQuiz, submitScore } from '../controllers/assessmentController.js';
+// Import the controller functions
+import { generateQuiz, submitScore, getStudentPerformancePrediction } from '../controllers/assessmentController.js';
+// Import the authentication middleware
 import { protect } from '../middleware/auth.js';
 
-// @route   GET /api/assessments/generate
-// @desc    Generate an AI quiz
-// @access  Private (User)
+// Route to generate a quiz (if you have a separate feature for this)
 router.get('/generate', protect, generateQuiz);
 
-// @route   POST /api/assessments/submit
-// @desc    Submit user's quiz score and answers
-// @access  Private (User)
+// Route to submit a student's quiz score and answers
 router.post('/submit', protect, submitScore);
+
+// Route to get a student's performance prediction for a specific course
+// The :courseId parameter is used to identify the course
+router.get('/prediction/:courseId', protect, getStudentPerformancePrediction); 
 
 export default router;

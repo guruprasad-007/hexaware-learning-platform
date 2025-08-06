@@ -2,13 +2,17 @@
 
 import { getVideosByQuery } from '../services/youtubeService.js';
 import * as aiService from '../services/aiService.js'; 
-import mongoose from "mongoose";
+import mongoose from "mongoose"; // Keep mongoose import
 
 export const getEnrolledCourses = async (req, res) => {
     const userId = req.user._id;
 
     try {
       const User = (await import("../models/User.js")).default; 
+      // Explicitly get the Course model from Mongoose to ensure it's registered
+      // This is a common workaround for MissingSchemaError during populate
+      const CourseModel = mongoose.model('Course'); 
+
       const userWithCourses = await User.findById(userId).populate("enrolledCourses");
       if (!userWithCourses) {
         return res.status(404).json({ message: "User not found" });
@@ -118,30 +122,29 @@ export const generateCourseContent = async (req, res) => {
             return res.status(404).json({ message: "Course not found" });
         }
 
-        const numLessons = course.lessons || 3; // Use course.lessons or default to 3
-        if (numLessons <= 0) {
-            return res.status(400).json({ message: "Course has no lessons specified to generate content for." });
+        if (!course.modules || course.modules.length === 0) {
+            const numLessons = course.lessons || 3; 
+            const generatedModules = [];
+            
+            for (let i = 1; i <= numLessons; i++) {
+                generatedModules.push({
+                    title: `Lesson ${i}: ${course.title} - Part ${i}`,
+                    content: `This is content for Lesson ${i} of the ${course.title} course.`,
+                    youtubeVideo: {}, 
+                    quiz: {} 
+                });
+            }
+            course.modules = generatedModules; 
         }
 
-        // Clear existing generated content before regenerating
-        course.generatedLessonContent = []; 
+        for (let [index, module] of course.modules.entries()) {
+            const moduleTitle = module.title;
 
-        // Loop based on the 'lessons' count, not the 'modules' array
-        for (let i = 1; i <= numLessons; i++) {
-            const lessonTitle = `${course.title} - Lesson ${i}`; // Dynamic title for video/quiz query
-            let lessonContent = {
-                lessonNumber: i,
-                title: lessonTitle,
-                youtubeVideo: {},
-                quiz: {}
-            };
-
-            // 1. Fetch a video from YouTube
             try {
-                const videos = await getVideosByQuery(lessonTitle, 1); 
+                const videos = await getVideosByQuery(moduleTitle, 1);
                 if (videos && videos.length > 0) {
-                    const bestVideo = videos[0]; 
-                    lessonContent.youtubeVideo = {
+                    const bestVideo = videos[0];
+                    module.youtubeVideo = {
                         videoId: bestVideo.videoId,
                         title: bestVideo.title,
                         description: bestVideo.description,
@@ -150,28 +153,28 @@ export const generateCourseContent = async (req, res) => {
                         embedUrl: `https://www.youtube.com/embed/${bestVideo.videoId}`,
                         duration: bestVideo.duration 
                     };
+                } else {
+                    module.youtubeVideo = {}; 
                 }
             } catch (videoError) {
-                console.error(`Error fetching video for lesson '${lessonTitle}':`, videoError.message);
+                console.error(`Error fetching video for module '${moduleTitle}':`, videoError.message);
+                module.youtubeVideo = {}; 
             }
 
-            // 2. Generate a quiz using aiService's generateQuiz
-            try { 
-                const quizQuestions = await aiService.generateQuiz(lessonTitle); 
+            try {
+                const quizQuestions = await aiService.generateQuiz(moduleTitle);
                 if (quizQuestions && quizQuestions.length > 0) {
-                    lessonContent.quiz = {
+                    module.quiz = {
                         questions: quizQuestions,
                         isGenerated: true
                     };
                 } else {
-                    lessonContent.quiz = { questions: [], isGenerated: false };
+                    module.quiz = { questions: [], isGenerated: false };
                 }
             } catch (quizError) {
-                console.error(`Error generating quiz for lesson '${lessonTitle}':`, quizError.message);
-                lessonContent.quiz = { questions: [], isGenerated: false };
+                console.error(`Error generating quiz for module '${moduleTitle}':`, quizError.message);
+                module.quiz = { questions: [], isGenerated: false };
             }
-
-            course.generatedLessonContent.push(lessonContent);
         }
         
         course.youtubeVideosGenerated = true;

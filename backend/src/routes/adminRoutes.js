@@ -5,7 +5,7 @@ import { protect, adminOnly } from '../middleware/auth.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-const router = express.Router();
+const router = express();
 
 const ADMIN_EMAIL = "guruadmin17@gmail.com";
 const ADMIN_PASSWORD_HASH = "$2b$10$ABuRmAWRlvqh70TLOQ/gluFz1cY8jMO/n2De3Dm0CppeTJZ7VdM7q";
@@ -186,7 +186,6 @@ router.post('/courses', async (req, res) => {
         generatedModules.push({
             title: `Lesson ${i}: ${title} - Part ${i}`,
             content: `This is content for Lesson ${i} of the ${title} course.`,
-            videoUrl: '',
             youtubeVideo: {},
             quiz: {}
         });

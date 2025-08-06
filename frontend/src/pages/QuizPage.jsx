@@ -4,16 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-// PlayCircle is not used in QuizPage, can be removed if not needed for other elements
-// import { PlayCircle } from "lucide-react"; 
-import api from '../services/api'; // Import your API service
+import api from '../services/api'; 
 
 export default function QuizPage() {
-    const { id: courseId, lessonNumber } = useParams(); // Get both courseId and lessonNumber
+    const { id: courseId, lessonNumber } = useParams(); 
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [userAnswers, setUserAnswers] = useState({});
+    const [userAnswers, setUserAnswers] = useState({}); 
     const [score, setScore] = useState(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const navigate = useNavigate();
@@ -24,7 +22,13 @@ export default function QuizPage() {
                 setLoading(true);
                 setError(null);
 
-                // Fetch the course details from your backend
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setError('You must be logged in to take a quiz.');
+                    setLoading(false);
+                    return;
+                }
+
                 const response = await api.get(`/courses/${courseId}`);
                 const course = response.data;
 
@@ -33,17 +37,15 @@ export default function QuizPage() {
                     return;
                 }
 
-                // Find the specific lesson's quiz using lessonNumber
-                const lesson = course.generatedLessonContent.find(
-                    (l) => l.lessonNumber === parseInt(lessonNumber, 10)
-                );
+                const moduleIndex = parseInt(lessonNumber, 10) - 1;
+                const lessonModule = course.modules[moduleIndex];
 
-                if (!lesson || !lesson.quiz || !lesson.quiz.isGenerated || !lesson.quiz.questions || lesson.quiz.questions.length === 0) {
+                if (!lessonModule || !lessonModule.quiz || !lessonModule.quiz.isGenerated || !lessonModule.quiz.questions || lessonModule.quiz.questions.length === 0) {
                     setError('Quiz not found for this lesson or not yet generated.');
                     return;
                 }
 
-                setQuestions(lesson.quiz.questions);
+                setQuestions(lessonModule.quiz.questions);
 
             } catch (err) {
                 console.error("Error fetching quiz:", err);
@@ -56,52 +58,55 @@ export default function QuizPage() {
         if (courseId && lessonNumber) {
             fetchQuizQuestions();
         }
-    }, [courseId, lessonNumber]); // Depend on courseId and lessonNumber
+    }, [courseId, lessonNumber]);
 
-    // parseQuestions is no longer needed as questions are already parsed from DB
-    // const parseQuestions = (text) => { ... }; 
-
-    const handleOptionChange = (questionIndex, selectedOption) => {
-        setUserAnswers(prev => ({ ...prev, [questionIndex]: selectedOption }));
+    const handleOptionChange = (questionIndex, selectedOptionValue) => { // Renamed parameter for clarity
+        setUserAnswers(prev => ({ ...prev, [questionIndex]: selectedOptionValue }));
     };
 
     const handleSubmitQuiz = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
+
         let calculatedScore = 0;
         const answersToSubmit = questions.map((q, index) => {
-            const isCorrect = userAnswers[index] === q.correctAnswer;
-            if (isCorrect) calculatedScore++;
+            // The comparison is now between the extracted letter (e.g., 'A') and q.correctAnswer ('A')
+            const isCorrect = userAnswers[index] === q.correctAnswer; 
+            if (isCorrect) calculatedScore++; 
             return {
                 question: q.question,
-                userAnswer: userAnswers[index],
-                isCorrect,
-                correctAnswer: q.correctAnswer // Include correct answer in submission for backend validation
+                userAnswer: userAnswers[index] || 'Not answered', 
+                correctAnswer: q.correctAnswer, 
+                isCorrect 
             };
         });
 
-        setScore(calculatedScore);
-        setIsSubmitted(true);
-        alert(`Quiz submitted! Your score: ${calculatedScore}/${questions.length}`);
-
-        // Optional: Send score to backend (e.g., to /api/assessments/submit)
-        // You would need to ensure your backend's submitScore endpoint is ready for this payload
-        /*
+        setScore(calculatedScore); 
+        setIsSubmitted(true); 
+        
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                setError("You must be logged in to submit your score.");
+                return;
+            }
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await api.post('/assessments/submit', {
+            
+            const quizSubmissionData = {
                 courseId,
                 lessonNumber: parseInt(lessonNumber, 10),
+                quizTitle: questions[0]?.quizTitle || `Quiz for Lesson ${lessonNumber}`, 
                 score: calculatedScore,
                 totalQuestions: questions.length,
-                answers: answersToSubmit
-            }, config);
-            console.log("Score submitted to backend successfully!");
+                answers: answersToSubmit 
+            };
+
+            await api.post('/assessments/submit', quizSubmissionData, config);
+            alert("Quiz submitted successfully! Your score has been recorded."); 
+
         } catch (submitError) {
             console.error("Failed to submit score to backend:", submitError);
-            // Handle error, e.g., show a message to the user
+            setError(`Failed to submit score: ${submitError.response?.data?.message || submitError.message}`);
         }
-        */
     };
 
     if (loading) return <div className="text-center mt-20">Loading quiz...</div>;
@@ -121,13 +126,11 @@ export default function QuizPage() {
                                 <div key={optionIndex} className="flex items-center mb-2">
                                     <input
                                         type="radio"
-                                        name={`question-${index}`}
-                                        // The option value should be the full option string, not just charAt(0)
-                                        // unless your backend's correctAnswer is also just 'A', 'B', 'C', 'D'
-                                        value={option} 
-                                        checked={userAnswers[index] === option}
-                                        onChange={() => handleOptionChange(index, option)}
-                                        disabled={isSubmitted}
+                                        name={`question-${index}`} 
+                                        value={option.charAt(0)} // <--- CRITICAL CHANGE: Set value to 'A', 'B', 'C', 'D'
+                                        checked={userAnswers[index] === option.charAt(0)} // <--- CRITICAL CHANGE: Compare with 'A', 'B', 'C', 'D'
+                                        onChange={() => handleOptionChange(index, option.charAt(0))} // <--- CRITICAL CHANGE: Pass 'A', 'B', 'C', 'D'
+                                        disabled={isSubmitted} 
                                         className="form-radio h-4 w-4 text-purple-600 transition duration-150 ease-in-out"
                                     />
                                     <label className="ml-2 text-gray-700">{option}</label>
