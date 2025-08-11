@@ -1,0 +1,591 @@
+/* frontend/src/styles/Header.css */
+
+/* -----------------------------------------------
+   Custom Scrollbar Styles
+-------------------------------------------------*/
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Main Header Styles - FIXED: Removed overflow hidden */
+.header {
+    position: relative;
+    background: linear-gradient(to right, #9333ea, #4f46e5, #2563eb);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(16px);
+    /* REMOVED: overflow: hidden; - This was cutting off the mic button */
+    z-index: 20; /* Reduced from higher value to allow voice assistant to be above */
+}
+
+/* Background Elements */
+.header-background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.floating-element {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+}
+
+.floating-element-1 {
+    top: -2.5rem;
+    left: -5rem;
+    width: 16rem;
+    height: 16rem;
+    background: linear-gradient(to bottom right, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.1));
+    animation: float-slow 6s ease-in-out infinite;
+}
+
+.floating-element-2 {
+    top: 0;
+    right: -2.5rem;
+    width: 12rem;
+    height: 12rem;
+    background: linear-gradient(to bottom left, rgba(96, 165, 250, 0.15), rgba(129, 140, 248, 0.15));
+    filter: blur(32px);
+    animation: float-reverse 8s ease-in-out infinite;
+}
+
+.floating-element-3 {
+    bottom: 0;
+    left: 33.333333%;
+    width: 8rem;
+    height: 8rem;
+    background: linear-gradient(to top right, rgba(196, 181, 253, 0.2), rgba(251, 182, 206, 0.2));
+    filter: blur(24px);
+    animation: pulse-gentle 4s ease-in-out infinite;
+}
+
+/* Header Container - REDUCED HEIGHT */
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem; /* Reduced from 1.5rem to 1rem */
+    position: relative;
+    z-index: 10;
+    gap: 2rem; /* Add gap between sections */
+}
+
+/* Logo Section - ADJUSTED FOR REDUCED HEIGHT */
+.header-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem; /* Slightly reduced gap */
+    animation: fade-in-left 0.6s ease-out forwards;
+    flex-shrink: 0; /* Prevent shrinking */
+    margin-right: auto; /* Push everything else to the right */
+}
+
+.logo-link {
+    position: relative;
+    display: block;
+}
+
+.logo-icon {
+    width: 3.5rem; /* Slightly reduced from 4rem */
+    height: 3.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    /* Force circular shape */
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    max-width: 3.5rem;
+    max-height: 3.5rem;
+}
+
+.logo-link:hover .logo-icon {
+    transform: scale(1.1);
+    box-shadow: 0 30px 60px -12px rgba(147, 51, 234, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.logo-svg {
+    width: 2.75rem; /* Slightly reduced from 3rem */
+    height: 2.75rem;
+    color: white;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    transition: all 0.3s ease;
+}
+
+.logo-link:hover .logo-svg {
+    transform: scale(1.05);
+    filter: drop-shadow(0 6px 8px rgba(147, 51, 234, 0.3));
+}
+
+.logo-indicator {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    width: 1rem;
+    height: 1rem;
+    background: #34d399;
+    border-radius: 9999px;
+    border: 2px solid white;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.header-title {
+    font-size: 1.875rem; /* Slightly reduced from 2rem */
+    font-weight: 700;
+    color: white;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    letter-spacing: 0.05em;
+    background: linear-gradient(-45deg, #fff, #e0e7ff, #c7d2fe, #a5b4fc);
+    background-size: 400% 400%;
+    animation: gradient-text 3s ease infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Prevent title wrapping */
+}
+
+.header-logo:hover .header-title {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15));
+}
+
+/* Navigation Styles - IMPROVED LAYOUT AND FONT SIZE */
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Increased gap between nav items */
+    animation: fade-in-right 0.6s ease-out forwards;
+    flex-shrink: 0; /* Prevent shrinking */
+    margin-left: auto; /* Push to the right */
+}
+
+.nav-link {
+    position: relative;
+    display: block;
+    padding: 0.75rem 1.75rem; /* Reduced vertical padding from 0.875rem to 0.75rem */
+    color: white;
+    font-weight: 600;
+    font-size: 1rem; /* Increased font size from default */
+    transition: all 0.3s ease;
+    border-radius: 0.75rem;
+    border: 1px solid transparent;
+    backdrop-filter: blur(4px);
+    text-decoration: none;
+    transform: translateY(0);
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.nav-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+    transform: skewX(-12deg) translateX(-100%);
+    border-radius: 0.75rem;
+    transition: transform 0.7s ease;
+}
+
+.nav-link:hover .nav-shimmer {
+    transform: skewX(-12deg) translateX(100%);
+}
+
+.nav-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem; /* Increased gap between icon and text */
+    font-size: 1rem; /* Ensure consistent font size */
+}
+
+.nav-icon {
+    width: 1.125rem; /* Slightly larger icons */
+    height: 1.125rem;
+    flex-shrink: 0; /* Prevent icon shrinking */
+}
+
+/* Voice Assistant Floating Button - COMPLETELY FIXED */
+.voice-assistant-floating {
+    position: fixed !important;
+    bottom: 2rem !important;
+    right: 2rem !important;
+    z-index: 99999 !important; /* Much higher than header z-index */
+    /* Ensure it's completely separate from header */
+    pointer-events: auto !important;
+    /* Force visibility and proper display */
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Enhanced microphone button styles */
+.voice-assistant-floating button {
+    position: relative !important;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    box-shadow: 0 8px 25px -5px rgba(102, 126, 234, 0.4) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform-origin: center !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    /* Prevent any clipping */
+    overflow: visible !important;
+}
+
+.voice-assistant-floating button:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 12px 35px -5px rgba(102, 126, 234, 0.6) !important;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+}
+
+.voice-assistant-floating button:active {
+    transform: scale(1.05) !important;
+}
+
+/* Microphone icon styling - ensure visibility */
+.voice-assistant-floating svg,
+.voice-assistant-floating .mic-icon {
+    display: block !important;
+    width: 24px !important;
+    height: 24px !important;
+    color: white !important;
+    transition: all 0.2s ease !important;
+    /* Prevent any transforms that might hide the icon */
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Recording state styles */
+.voice-assistant-floating button.recording {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
+    animation: recording-pulse 1s ease-in-out infinite !important;
+}
+
+/* Recording pulse animation */
+@keyframes recording-pulse {
+    0%, 100% {
+        box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 25px -5px rgba(255, 107, 107, 0.8), 0 0 0 10px rgba(255, 107, 107, 0.1);
+    }
+}
+
+/* -----------------------------------------------
+   Animation Keyframes
+-------------------------------------------------*/
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(3deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(-2deg);
+  }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gradient-text {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* -----------------------------------------------
+   Animation Utility Classes
+-------------------------------------------------*/
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+.animate-bounce {
+  animation: bounce 0.6s infinite;
+}
+
+.animate-fade-in-right {
+  animation: fade-in-right 0.3s ease-out forwards;
+}
+
+.animate-fade-in-left {
+  animation: fade-in-left 0.6s ease-out forwards;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 8s ease-in-out infinite;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 4s ease-in-out infinite;
+}
+
+.animate-gradient-text {
+  background: linear-gradient(-45deg, #fff, #e0e7ff, #c7d2fe, #a5b4fc);
+  background-size: 400% 400%;
+  animation: gradient-text 3s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.animate-dropdown {
+  animation: dropdown 0.3s ease-out forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: row; /* Keep horizontal layout on mobile */
+        gap: 1rem;
+        padding: 0.75rem 1.5rem; /* Reduced padding for smaller header */
+        justify-content: space-between; /* Maintain space distribution */
+    }
+    
+    .header-nav {
+        flex-wrap: nowrap; /* Prevent wrapping */
+        gap: 0.5rem;
+        overflow-x: auto; /* Allow horizontal scroll if needed */
+    }
+    
+    .nav-link {
+        padding: 0.5rem 1.25rem; /* Reduced padding */
+        font-size: 0.9rem; /* Slightly smaller but still readable */
+        min-width: max-content; /* Prevent shrinking */
+    }
+    
+    .header-title {
+        font-size: 1.5rem; /* Smaller on mobile */
+    }
+    
+    .header-logo {
+        gap: 0.75rem;
+        flex-shrink: 0; /* Prevent logo from shrinking */
+    }
+    
+    .logo-icon {
+        width: 3rem; /* Smaller on mobile */
+        height: 3rem;
+        min-width: 3rem;
+        min-height: 3rem;
+        max-width: 3rem;
+        max-height: 3rem;
+    }
+    
+    .logo-svg {
+        width: 2.25rem; /* Proportionally smaller */
+        height: 2.25rem;
+    }
+
+    /* Maintain microphone position on mobile */
+    .voice-assistant-floating {
+        bottom: 1.5rem !important;
+        right: 1.5rem !important;
+    }
+
+    .voice-assistant-floating button {
+        width: 55px !important;
+        height: 55px !important;
+    }
+
+    .voice-assistant-floating svg,
+    .voice-assistant-floating .mic-icon {
+        width: 22px !important;
+        height: 22px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-container {
+        padding: 0.625rem 1rem; /* Further reduced padding */
+        gap: 0.75rem;
+    }
+    
+    .header-logo {
+        gap: 0.5rem;
+    }
+    
+    .header-title {
+        font-size: 1.375rem; /* Smaller on very small screens */
+    }
+    
+    .nav-link {
+        padding: 0.4rem 0.875rem; /* Smaller padding */
+        font-size: 0.85rem;
+    }
+    
+    .logo-icon {
+        width: 2.75rem; /* Smaller logo */
+        height: 2.75rem;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        max-width: 2.75rem;
+        max-height: 2.75rem;
+    }
+    
+    .logo-svg {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    /* Smaller microphone on very small screens */
+    .voice-assistant-floating {
+        bottom: 1rem !important;
+        right: 1rem !important;
+    }
+
+    .voice-assistant-floating button {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .voice-assistant-floating svg,
+    .voice-assistant-floating .mic-icon {
+        width: 20px !important;
+        height: 20px !important;
+    }
+}
+
+/* Extra wide screens - optimize spacing */
+@media (min-width: 1400px) {
+    .header-container {
+        max-width: 1400px;
+        padding: 1.25rem 3rem; /* Reduced from 1.5rem */
+    }
+    
+    .nav-link {
+        padding: 0.875rem 2rem; /* Slightly reduced vertical padding */
+        font-size: 1.1rem; /* Slightly larger font */
+    }
+    
+    .header-title {
+        font-size: 2rem; /* Reasonable size for wide screens */
+    }
+}

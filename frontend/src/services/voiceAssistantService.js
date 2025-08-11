@@ -1,15 +1,18 @@
 // frontend/src/services/voiceAssistantService.js
-import api from './api'; // Re-use your existing axios instance
+import api from './api';
+
+const AI_AGENT_BASE_URL = 'http://localhost:8000'; 
 
 export const processVoiceCommand = async (commandText) => {
-  try {
-    console.log("Sending voice command to backend:", commandText);
-    // This endpoint will be handled by your Node.js backend
-    const response = await api.post('/voice-command', { command: commandText });
-    console.log("Received AI action from backend:", response.data);
-    return response.data; // Expecting { action: "navigate", target: "/dashboard" } or { action: "respond", response: "..." }
-  } catch (error) {
-    console.error('Error in voiceAssistantService:', error);
-    throw error;
-  }
+    try {
+        console.log("Sending voice command to AI agent:", commandText);
+        const response = await api.post(`${AI_AGENT_BASE_URL}/process_voice_command`, 
+            { command_text: commandText }
+        );
+        console.log("Received AI action from backend:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error in voiceAssistantService:', error);
+        throw error;
+    }
 };

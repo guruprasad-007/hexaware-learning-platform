@@ -22,21 +22,19 @@ export const getChatbotResponse = async (message) => {
 };
 
 export const processVoiceCommand = async (commandText) => {
-  try {
-    const response = await axios.post(`${AI_AGENT_BASE_URL}/process_voice_command`, {
-      command_text: commandText,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error communicating with Python voice agent:', error.message);
-    if (error.response) {
-        console.error('Voice Agent Response Data:', error.response.data);
-    } else if (error.request) {
-        console.error('No response received from Voice Agent:', error.request);
-    }
-    throw new Error('Could not get response from AI voice command service.');
-  }
+    try {
+        console.log("Sending voice command to AI agent:", commandText);
+        const response = await api.post(`${AI_AGENT_BASE_URL}/process_voice_command`, 
+            { command_text: commandText }
+        );
+        console.log("Received AI action from backend:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error in voiceAssistantService:', error);
+        throw error;
+    }
 };
+
 
 export const generateQuiz = async (topic) => {
     try {
