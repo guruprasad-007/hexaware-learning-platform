@@ -9,6 +9,7 @@ import AddCoursePage from './pages/AddCoursePage.jsx';
 import CourseDetailsPage from './pages/CourseDetailsPage';
 import QuizPage from './pages/QuizPage';
 import AdminCoursesPage from './pages/AdminCoursesPage';
+import CodeCompilerPage from './pages/CodeCompilerPage';
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route path="/admin/courses/add" element={<AddCoursePage />} />
         <Route path="/admin/courses" element={<AdminCoursesPage />} />
+        <Route path="/compiler/:lang" element={<CodeCompilerPage />} />
         
       </Routes>
     </BrowserRouter>

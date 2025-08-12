@@ -1,7 +1,7 @@
 // frontend/src/pages/CourseDetailPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BookOpen, Users, Clock, Star, PlayCircle, Zap } from "lucide-react";
+import { BookOpen, Users, Clock, Star, PlayCircle, Zap, Terminal } from "lucide-react"; // Import Terminal icon
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import api from '../services/api';
@@ -45,7 +45,7 @@ export default function CourseDetailPage() {
             const config = { headers: { Authorization: `Bearer ${token}` } };
             const response = await api.post(`/courses/${id}/generate-content`, {}, config);
             setContentStatus(response.data.message);
-            await fetchCourse(); // Re-fetch course to update UI with new content
+            await fetchCourse();
         } catch (error) {
             console.error("Error generating course content:", error);
             setContentStatus(`Failed to generate content: ${error.response?.data?.message || error.message}`);
@@ -54,10 +54,17 @@ export default function CourseDetailPage() {
         }
     };
 
-    // New handler to navigate to QuizPage
     const handleTakeQuiz = (lessonNumber) => {
-        // Navigate to the QuizPage, passing course ID and lesson number
         navigate(`/courses/${id}/quiz/${lessonNumber}`);
+    };
+
+    // New handler to navigate to the code compiler page
+    const handleCodeAndLearn = (courseCategory) => {
+        if (courseCategory) {
+            navigate(`/compiler/${courseCategory.toLowerCase()}`);
+        } else {
+            alert("No programming language specified for this course.");
+        }
     };
 
     if (!course) {
@@ -126,13 +133,13 @@ export default function CourseDetailPage() {
                     )}
                 </div>
 
-                {/* Display course.modules (CHANGED FROM generatedLessonContent) */}
+                {/* Display course.modules */}
                 {course.modules && course.modules.length > 0 ? (
                     <div className="mt-10 bg-white p-8 rounded-lg shadow-lg">
                         <h2 className="text-3xl font-bold text-gray-900 mb-6">Course Lessons</h2>
                         {course.modules.map((module, index) => (
                             <div key={index} className="mb-10 border-b pb-8 last:border-b-0 last:pb-0">
-                                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Lesson {index + 1}: {module.title}</h3> {/* Using index + 1 for lesson number */}
+                                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Lesson {index + 1}: {module.title}</h3>
                                 {module.youtubeVideo && module.youtubeVideo.embedUrl ? (
                                     <div className="aspect-video w-full mb-4 rounded-lg overflow-hidden shadow-md">
                                         <iframe
@@ -149,15 +156,25 @@ export default function CourseDetailPage() {
                                 )}
                                 {module.content && <p className="text-gray-700 mt-4 leading-relaxed">{module.content}</p>}
 
-                                {/* Take Quiz Button */}
-                                {module.quiz && module.quiz.isGenerated && module.quiz.questions && module.quiz.questions.length > 0 && (
+                                {/* Quiz & Code Button Container */}
+                                <div className="flex items-center gap-4 mt-4">
+                                    {module.quiz && module.quiz.isGenerated && module.quiz.questions && module.quiz.questions.length > 0 && (
+                                        <button 
+                                            onClick={() => handleTakeQuiz(index + 1)}
+                                            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-md"
+                                        >
+                                            <PlayCircle size={20} /> Take Quiz
+                                        </button>
+                                    )}
+                                    
+                                    {/* Code and Learn Button */}
                                     <button 
-                                        onClick={() => handleTakeQuiz(index + 1)} // Pass lesson number (index + 1)
-                                        className="mt-4 flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-md"
+                                        onClick={() => handleCodeAndLearn(course.category)}
+                                        className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-all duration-300 shadow-md"
                                     >
-                                        <PlayCircle size={20} /> Take Quiz
+                                        <Terminal size={20} /> Code & Learn
                                     </button>
-                                )}
+                                </div>
                             </div>
                         ))}
                     </div>

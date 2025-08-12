@@ -1,8 +1,8 @@
 // frontend/src/components/common/Header.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from "react-router-dom";
-import { User, LogOut, BookOpen, Calendar, Mic } from 'lucide-react';
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { User, LogOut, BookOpen, Calendar, Mic, Home, BarChart3, GraduationCap, Menu, X } from 'lucide-react';
 import api from '../../services/api';
 // Corrected import path: Go up one directory (from 'common') then down into 'voice'
 import VoiceAssistantComponent from "../voice/VoiceAssistantComponent.jsx";// <--- CORRECTED IMPORT PATH
@@ -10,11 +10,11 @@ import '../../styles/Header.css'; // CSS file for styling
 
 export default function Header() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState(null);
-    const [enrolledCoursesCount, setEnrolledCoursesCount] = useState(0);
-    const [loginStreak, setLoginStreak] = useState(7); // Placeholder for days logged in
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const location = useLocation();
     const dropdownRef = useRef(null);
 
     useEffect(() => {
@@ -25,9 +25,6 @@ export default function Header() {
                     const config = { headers: { Authorization: `Bearer ${token}` } };
                     const userResponse = await api.get('/auth/profile', config);
                     setUser(userResponse.data);
-
-                    const coursesResponse = await api.get('/courses/enrolled', config);
-                    setEnrolledCoursesCount(coursesResponse.data.length);
                 } catch (error) {
                     console.error("Failed to fetch user data for header:", error);
                     localStorage.removeItem('token');
@@ -62,88 +59,177 @@ export default function Header() {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
+
     const userRole = localStorage.getItem('role');
+
+    const navigationItems = [
+        { path: '/', label: 'Home', icon: Home },
+        { path: '/courses', label: 'Courses', icon: GraduationCap },
+        { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
+    ];
 
     return (
         <React.Fragment>
-            <header className="header">
-                <div className="header-background">
-                    <div className="floating-element floating-element-1"></div>
-                    <div className="floating-element floating-element-2"></div>
-                    <div className="floating-element floating-element-3"></div>
+            <header className="modern-header">
+                <div className="header-gradient-bg">
+                    <div className="gradient-orb orb-1"></div>
+                    <div className="gradient-orb orb-2"></div>
+                    <div className="gradient-orb orb-3"></div>
                 </div>
 
-                <div className="header-container">
-                    <div className="header-logo">
-                        <Link to="/" className="logo-link">
-                            <div className="logo-icon" style={{ borderRadius: '50%' }}>
-                                <img 
-                                    src="/logo.png" 
-                                    alt="E-GURU Logo" 
-                                    className="logo-svg"
-                                    style={{
-                                        width: '3rem',
-                                        height: '3rem',
-                                        objectFit: 'contain',
-                                        backgroundColor: 'transparent',
-                                        filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))',
-                                        mixBlendMode: 'multiply'
-                                    }}
+                <div className="header-content">
+                    {/* Logo Section */}
+                    <div className="logo-section">
+                        <Link to="/" className="logo-container">
+                            <div className="logo-wrapper">
+                                <img
+                                    src="/logo.png"
+                                    alt="E-GURU Logo"
+                                    className="logo-image"
                                     onError={(e) => {
                                         console.log('Logo failed to load from:', e.target.src);
                                         e.target.style.display = 'none';
                                     }}
                                 />
-                                <div className="logo-indicator"></div>
+                                <div className="logo-glow"></div>
+                            </div>
+                            <div className="brand-text">
+                                <h1 className="brand-name">E-GURU</h1>
+                                <span className="brand-tagline">Learning Excellence</span>
                             </div>
                         </Link>
-                        <h1 className="header-title">E-GURU</h1>
                     </div>
 
-                    <nav className="header-nav">
-                        <Link to="/" className="nav-link">
-                            <div className="nav-shimmer"></div>
-                            <span className="nav-content">
-                                <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                </svg>
-                                Home
-                            </span>
-                        </Link>
+                    {/* Right Side Container - Navigation, Voice Assistant, and User Section */}
+                    <div className="right-section">
+                        {/* Desktop Navigation */}
+                        <nav className="desktop-nav">
+                            {navigationItems.map((item) => {
+                                const IconComponent = item.icon;
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+                                    >
+                                        <div className="nav-item-content">
+                                            <IconComponent className="nav-icon" size={18} />
+                                            <span className="nav-text">{item.label}</span>
+                                            <div className="nav-indicator"></div>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </nav>
 
-                        <Link to="/courses" className="nav-link">
-                            <div className="nav-shimmer"></div>
-                            <span className="nav-content">
-                                <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                                Courses
-                            </span>
-                        </Link>
 
-                        <Link to="/dashboard" className="nav-link">
-                            <div className="nav-shimmer"></div>
-                            <span className="nav-content">
-                                <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Dashboard
-                            </span>
-                        </Link>
 
-                        {/* Profile Link with User Name */}
-                        <Link to="/" className="nav-link">
-                            <div className="nav-shimmer"></div>
-                            <span className="nav-content">
-                                <User className="nav-icon" />
-                                {user ? user.fullName || user.name : 'Profile'}
-                            </span>
-                        </Link>
-                    </nav>
+                        {/* User Section */}
+                        <div className="user-section">
+                            {/* User Profile Dropdown */}
+                            <div className="user-profile" ref={dropdownRef}>
+                                <button
+                                    className="profile-trigger"
+                                    onClick={toggleDropdown}
+                                    aria-expanded={isDropdownOpen}
+                                >
+                                    <div className="profile-avatar">
+                                        {user ? (
+                                            <img
+                                                src={user.avatar || '/default-avatar.png'}
+                                                alt={user.fullName || user.name}
+                                                className="avatar-image"
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        ) : null}
+                                        <User size={20} className="avatar-fallback" />
+                                        <div className="online-indicator"></div>
+                                    </div>
+                                    <div className="profile-info">
+                                        <span className="user-name">
+                                            {user ? (user.fullName || user.name) : 'Guest'}
+                                        </span>
+                                        <span className="user-role">{userRole || 'Student'}</span>
+                                    </div>
+                                </button>
+
+                                {isDropdownOpen && (
+                                    <div className="dropdown-menu">
+                                        <div className="dropdown-header">
+                                            <div className="user-details">
+                                                <h4>{user ? (user.fullName || user.name) : 'Guest'}</h4>
+                                                <p>{user?.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="dropdown-divider"></div>
+                                        <div className="dropdown-items">
+                                            <Link to="/dashboard" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                                <User size={16} />
+                                                <span>My Profile</span>
+                                            </Link>
+                                            <Link to="/courses" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                                <BookOpen size={16} />
+                                                <span>My Courses</span>
+                                            </Link>
+                                            <button className="dropdown-item logout-item" onClick={handleLogout}>
+                                                <LogOut size={16} />
+                                                <span>Sign Out</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Mobile Menu Button */}
+                            <button className="mobile-menu-btn" onClick={toggleMobileMenu}>
+                                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Mobile Navigation */}
+                {isMobileMenuOpen && (
+                    <div className="mobile-nav">
+                        <div className="mobile-nav-content">
+                            {navigationItems.map((item) => {
+                                const IconComponent = item.icon;
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        className={`mobile-nav-item ${isActive(item.path) ? 'active' : ''}`}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <IconComponent size={20} />
+                                        <span>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                            <div className="mobile-nav-divider"></div>
+                            <Link to="/profile" className="mobile-nav-item" onClick={() => setIsMobileMenuOpen(false)}>
+                                <User size={20} />
+                                <span>Profile</span>
+                            </Link>
+                            <button className="mobile-nav-item logout" onClick={handleLogout}>
+                                <LogOut size={20} />
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </header>
 
-             {/* Voice Assistant positioned as a floating button in bottom right */}
+            {/* Voice Assistant positioned as a floating button in bottom right */}
             <div className="voice-assistant-floating">
                 <VoiceAssistantComponent />
             </div>
